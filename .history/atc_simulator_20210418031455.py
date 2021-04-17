@@ -7,8 +7,7 @@ import time, string
 def appStarted(app):
     # graphics
     app.color = "white"
-    app.sidebarWidth = 260
-    app.mapWidth, app.mapHeight = app.width - app.sidebarWidth, app.height - 50
+    app.mapWidth, app.mapHeight = app.width - 270, app.height - 50
     app.input = []
     app.command = ""
     
@@ -18,14 +17,12 @@ def appStarted(app):
     app.startTime = time.time()
     
     # airports
+    """ Runway('25R', [0, -11], 251, 12000),
+    Runway('24L', [0, +6], 251, 12000),
+    Runway('24R', [0, +11], 251, 12000) """
     # TODO runway generator from data
     app.airport = Airport("KLAX", [app.mapWidth / 2, app.mapHeight / 2], [], 'F')
-    print(app.airport.pos)
-    app.airport.runways += [Runway('25L', [0, -6], 251, 12000, app.airport), 
-                            Runway('24R', [0, +11], 251, 12000, app.airport)]
-    """ Runway('25R', [0, -11], 251, 12000, app.airport),
-    Runway('24L', [0, +6], 251, 12000, app.airport), """
-                           
+    app.airport.runways.append(Runway('25L', [0, -6], 251, 12000, app.airport))
 
     # inital parameters
     app.wind = [123, 12]
@@ -69,7 +66,6 @@ def keyPressed(app, event):
             app.display = app.flights[app.index:app.index + app.sticks]
     elif event.key == "+":
         app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
-        app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
 
 def mousePressed(app, event):
     # detect mouse click on plane for selection
@@ -79,7 +75,7 @@ def mousePressed(app, event):
 
 # changes map size
 def sizeChanged(app):
-    app.mapWidth, app.mapHeight = app.width - app.sidebarWidth, app.height - 40
+    app.mapWidth, app.mapHeight = app.width - 250, app.height - 40
 
 # dragging flights for debugging
 def mouseDragged(app, event):
@@ -119,19 +115,16 @@ def drawAirport(app, canvas):
     #TODO draw runways properly
     cx, cy = app.mapWidth / 2, app.mapHeight / 2
     for runway in app.airport.runways:
-        rx, ry = runway.pos
         dx, dy = hdgVector(runway.hdg, runway.plength)
         p1, p2, p3, = runway.rangeILS()
-        # draw ILS range
-        canvas.create_polygon(p1, p2, p3, outline = app.color)
-        canvas.create_line(runway.pos, runway.beacon, fill = app.color)
         # draw runway
-        canvas.create_line(rx, ry, rx + dx, ry + dy, 
+        canvas.create_line(cx, cy, cx + dx, cy + dy, 
                         fill = app.color, width = 3)
         #TODO draw ILS wing
         canvas.create_oval(runway.beacon[0] - 1, runway.beacon[1] - 1, 
                             runway.beacon[0] + 1, runway.beacon[1] + 1,
                             fill = "white")
+        #canvas.create_polygon(p1, p2, p3, outline = app.color)
 
 # draws aircraft and information
 def drawAircraft(app, canvas, plane):

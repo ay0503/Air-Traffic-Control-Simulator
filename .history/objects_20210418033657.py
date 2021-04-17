@@ -54,6 +54,12 @@ def normalVector(vector):
     vector[0], vector[1] = -vector[1], vector[0]
     return vector
 
+def addVector(v1, v2):
+    return list(map(lambda x,y:x+y, v1, v2))
+
+def subtractVector(v1, v2):
+    return list(map(lambda x,y:x-y, v1, v2))
+
 def checkDirection(currHdg, hdg):
     if hdg == 0: hdg = 360
     if hdg > currHdg:

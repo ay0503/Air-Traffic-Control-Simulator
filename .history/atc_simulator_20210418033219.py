@@ -18,14 +18,16 @@ def appStarted(app):
     app.startTime = time.time()
     
     # airports
+    Runway('25R', [0, -11], 251, 12000)
+    Runway('24L', [0, +6], 251, 12000)
+    Runway('24R', [0, +11], 251, 12000)
     # TODO runway generator from data
     app.airport = Airport("KLAX", [app.mapWidth / 2, app.mapHeight / 2], [], 'F')
     print(app.airport.pos)
     app.airport.runways += [Runway('25L', [0, -6], 251, 12000, app.airport), 
-                            Runway('24R', [0, +11], 251, 12000, app.airport)]
-    """ Runway('25R', [0, -11], 251, 12000, app.airport),
-    Runway('24L', [0, +6], 251, 12000, app.airport), """
-                           
+                            Runway('25R', [0, -11], 251, 12000),
+                            Runway('24L', [0, +6], 251, 12000),
+                            Runway('24R', [0, +11], 251, 12000)]
 
     # inital parameters
     app.wind = [123, 12]

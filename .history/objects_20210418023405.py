@@ -21,7 +21,7 @@ def roundHalfUp(d):
     return int(decimal.Decimal(d).to_integral_value(rounding=rounding))
 
 def checkSafety(aircrafts):
-    #! BUG rechecks same aircraft and changes safety status
+    # !BUG rechecks same aircraft and changes safety status
     for fl1 in aircrafts:
         for fl2 in aircrafts:
             if fl1.pos != fl2.pos:
@@ -53,6 +53,9 @@ def hdgVector(hdg, spd):
 def normalVector(vector):
     vector[0], vector[1] = -vector[1], vector[0]
     return vector
+
+def addVector(x, y):
+    return list(map(lambda x,y:x+y, x, y)
 
 def checkDirection(currHdg, hdg):
     if hdg == 0: hdg = 360
@@ -125,7 +128,8 @@ class Flight(object):
         return airlineHubs[self.airlineCode()]
 
     def fltno(self):
-        airline = no = ''
+        airline = ''
+        no = ''
         for letter in self.callsign:
             if letter.isalpha():
                 airline += letter
@@ -218,16 +222,6 @@ class Flight(object):
     def checkArrival(self, runway):
         pass
 
-class Departure(Flight):
-
-    def __init__(self):
-        pass
-
-class Arrival(Flight):
-    
-    def __init__(self):
-        pass
-
 class Aircraft(object):
     
     def __init__(self, name, code, size, freq):
@@ -256,8 +250,7 @@ class Airline(object):
 
 class Airport(object):
 
-    def __init__(self, code, pos, runways, size):
-        self.pos = pos
+    def __init__(self, code, runways, size):
         self.code = code
         self.runways = runways
         self.limit = size
@@ -271,20 +264,20 @@ class Airport(object):
             return False
         return True
 
-class Runway(object):
+class Runways(object):
     
-    def __init__(self, rwy, pos, hdg, length, airport):
-        self.pos = list(map(lambda x, y : x + y, pos, airport.pos))
+    def __init__(self, rwy, pos, hdg, length):
+        self.pos = pos
         self.hdg = hdg
         self.rwy = rwy
         self.num = roundHalfUp(hdg / 10)
-        self.length = length 
-        self.plength = length / 500
-        self.beacon = list(map(lambda x,y:x+y, self.pos, hdgVector(self.hdg, 10 * self.plength)))
+        self.length = length
+        self.beacon = list(map(lambda x,y:x+y, self.pos, hdgVector(self.hdg, self.length / 1000)))
 
     def rangeILS(self):
-        norm = normalVector(list(map(lambda x,y: x-y, self.beacon, self.pos)))
-        p2 = list(map(lambda x,y: x - y / 15, self.beacon, norm))
-        p3 = list(map(lambda x,y: x + y / 15, self.beacon, norm))
-        p1 = self.pos
-        return p1, p2, p3
+        vector = list(map(lambda x,y:x-y, self.beacon, self.pos))
+        base = list(map(lambda x,y:x+y, self.beacon, normalVector(vector)) / 8
+        p1, p2, p3 = 
+
+L = Runways('25L', [0,0], 251, 12000)
+print(L.beacon)

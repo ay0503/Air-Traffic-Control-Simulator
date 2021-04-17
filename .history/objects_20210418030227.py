@@ -54,6 +54,12 @@ def normalVector(vector):
     vector[0], vector[1] = -vector[1], vector[0]
     return vector
 
+def addVector(v1, v2):
+    return list(map(lambda x,y:x+y, v1, v2))
+
+def subtractVector(v1, v2):
+    return list(map(lambda x,y:x-y, v1, v2))
+
 def checkDirection(currHdg, hdg):
     if hdg == 0: hdg = 360
     if hdg > currHdg:
@@ -125,7 +131,8 @@ class Flight(object):
         return airlineHubs[self.airlineCode()]
 
     def fltno(self):
-        airline = no = ''
+        airline = ''
+        no = ''
         for letter in self.callsign:
             if letter.isalpha():
                 airline += letter
@@ -218,16 +225,6 @@ class Flight(object):
     def checkArrival(self, runway):
         pass
 
-class Departure(Flight):
-
-    def __init__(self):
-        pass
-
-class Arrival(Flight):
-    
-    def __init__(self):
-        pass
-
 class Aircraft(object):
     
     def __init__(self, name, code, size, freq):
@@ -283,8 +280,11 @@ class Runway(object):
         self.beacon = list(map(lambda x,y:x+y, self.pos, hdgVector(self.hdg, 10 * self.plength)))
 
     def rangeILS(self):
-        norm = normalVector(list(map(lambda x,y: x-y, self.beacon, self.pos)))
-        p2 = list(map(lambda x,y: x - y / 15, self.beacon, norm))
-        p3 = list(map(lambda x,y: x + y / 15, self.beacon, norm))
-        p1 = self.pos
+        vector = list(map(lambda x,y:x-y, self.beacon, self.pos))
+        base = list(map(lambda x: x / 15, addVector(self.beacon, normalVector(vector))))
+        p1, p2, p3 = subtractVector(self.beacon, base), addVector(self.beacon, base), self.pos
         return p1, p2, p3
+
+""" L = Runway('25L', [0,0], 251, 12000)
+print(L.beacon)
+print(L.rangeILS()) """

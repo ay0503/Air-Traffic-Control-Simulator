@@ -23,8 +23,8 @@ def appStarted(app):
     print(app.airport.pos)
     app.airport.runways += [Runway('25L', [0, -6], 251, 12000, app.airport), 
                             Runway('24R', [0, +11], 251, 12000, app.airport)]
-    """ Runway('25R', [0, -11], 251, 12000, app.airport),
-    Runway('24L', [0, +6], 251, 12000, app.airport), """
+                            """ Runway('25R', [0, -11], 251, 12000, app.airport),
+                            Runway('24L', [0, +6], 251, 12000, app.airport), """
                            
 
     # inital parameters

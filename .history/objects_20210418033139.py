@@ -54,6 +54,12 @@ def normalVector(vector):
     vector[0], vector[1] = -vector[1], vector[0]
     return vector
 
+def addVector(v1, v2):
+    return list(map(lambda x,y:x+y, v1, v2))
+
+def subtractVector(v1, v2):
+    return list(map(lambda x,y:x-y, v1, v2))
+
 def checkDirection(currHdg, hdg):
     if hdg == 0: hdg = 360
     if hdg > currHdg:
@@ -288,3 +294,7 @@ class Runway(object):
         p3 = list(map(lambda x,y: x + y / 15, self.beacon, norm))
         p1 = self.pos
         return p1, p2, p3
+
+""" L = Runway('25L', [0,0], 251, 12000)
+print(L.beacon)
+print(L.rangeILS()) """

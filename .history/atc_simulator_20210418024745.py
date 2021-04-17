@@ -7,8 +7,7 @@ import time, string
 def appStarted(app):
     # graphics
     app.color = "white"
-    app.sidebarWidth = 260
-    app.mapWidth, app.mapHeight = app.width - app.sidebarWidth, app.height - 50
+    app.mapWidth, app.mapHeight = app.width - 270, app.height - 50
     app.input = []
     app.command = ""
     
@@ -18,15 +17,13 @@ def appStarted(app):
     app.startTime = time.time()
     
     # airports
+    """ Runway('25R', [0, -11], 251, 12000),
+    Runway('24L', [0, +6], 251, 12000),
+    Runway('24R', [0, +11], 251, 12000) """
     # TODO runway generator from data
-    app.airport = Airport("KLAX", [app.mapWidth / 2, app.mapHeight / 2], [], 'F')
-    print(app.airport.pos)
-    app.airport.runways += [Runway('25L', [0, -6], 251, 12000, app.airport), 
-                            Runway('24R', [0, +11], 251, 12000, app.airport)]
-    """ Runway('25R', [0, -11], 251, 12000, app.airport),
-    Runway('24L', [0, +6], 251, 12000, app.airport), """
-                           
-
+    app.airport = Airport("KLAX", 
+    [Runway('25L', [0, -6], 251, 12000)], 'F')
+    print(app.airport.runways[0].pos)
     # inital parameters
     app.wind = [123, 12]
     app.timerDelay = 1000
@@ -36,8 +33,7 @@ def appStarted(app):
     app.flights = []
     for count in range(2):
         app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
-    app.sticks = 7
-    app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
+    app.display = app.flights[app.index:min(len(app.flights), app.index + 5)]
 
 def keyPressed(app, event):
     if app.selected != None:
@@ -60,16 +56,16 @@ def keyPressed(app, event):
             executeCommand(app.flights, app.command)
             app.input = []
     if event.key == "Up":
-        if app.display != app.flights[:app.sticks]:
+        if app.display != app.flights[:5]:
             app.index -= 1
-            app.display = app.flights[app.index:app.index + app.sticks]
+            app.display = app.flights[app.index:app.index + 5]
     elif event.key == "Down":
-        if app.display != app.flights[len(app.flights) - app.sticks:]:
+        if app.display != app.flights[len(app.flights) - 5:]:
             app.index += 1
-            app.display = app.flights[app.index:app.index + app.sticks]
+            app.display = app.flights[app.index:app.index + 5]
     elif event.key == "+":
         app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
-        app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
+        app.display = app.flights[app.index:min(len(app.flights), app.index + 5)]
 
 def mousePressed(app, event):
     # detect mouse click on plane for selection
@@ -79,7 +75,7 @@ def mousePressed(app, event):
 
 # changes map size
 def sizeChanged(app):
-    app.mapWidth, app.mapHeight = app.width - app.sidebarWidth, app.height - 40
+    app.mapWidth, app.mapHeight = app.width - 250, app.height - 40
 
 # dragging flights for debugging
 def mouseDragged(app, event):
@@ -87,9 +83,7 @@ def mouseDragged(app, event):
         app.selected.pos = [event.x, event.y]
 
 def timerFired(app):
-    """ print(list(map(lambda x: x.callsign, app.flights)))
-    print(list(map(lambda x: x.callsign, app.display))) """
-    app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
+    app.displayLength = min(len(app.flights), app.height // 180)
     # moves aircraft
     for aircraft in app.flights:
         aircraft.move()
@@ -119,19 +113,15 @@ def drawAirport(app, canvas):
     #TODO draw runways properly
     cx, cy = app.mapWidth / 2, app.mapHeight / 2
     for runway in app.airport.runways:
-        rx, ry = runway.pos
-        dx, dy = hdgVector(runway.hdg, runway.plength)
-        p1, p2, p3, = runway.rangeILS()
-        # draw ILS range
-        canvas.create_polygon(p1, p2, p3, outline = app.color)
-        canvas.create_line(runway.pos, runway.beacon, fill = app.color)
+        dx, dy = hdgVector(runway.hdg, runway.length)
         # draw runway
-        canvas.create_line(rx, ry, rx + dx, ry + dy, 
+        canvas.create_line(cx + runway.pos[0], cy + runway.pos[1], 
+                        cx + runway.pos[0] + dx, cy + runway.pos[1] + dy, 
                         fill = app.color, width = 3)
         #TODO draw ILS wing
-        canvas.create_oval(runway.beacon[0] - 1, runway.beacon[1] - 1, 
-                            runway.beacon[0] + 1, runway.beacon[1] + 1,
-                            fill = "white")
+        """ canvas.create_oval(runway.beacon[0] - 2, runway.beacon[1] - 2, 
+                            runway.beacon[0] + 2, runway.beacon[1] + 2,
+                            fill = "blue") """
 
 # draws aircraft and information
 def drawAircraft(app, canvas, plane):
@@ -169,7 +159,7 @@ def drawSidebar(app, canvas):
         info = f"{app.flights.index(flight) + 1}. {flight.callsign}, {flight.type.code}, {flight.hdg}°, {flight.spd}kt, \n{int(flight.alt)}ft,  {flight.vs}ft/m,  {flight.start} - {flight.end}"
         canvas.create_rectangle(app.mapWidth + margin, 30 + row * (50 + margin),
                                 app.width - margin, 30 + row * margin + (row + 1) * 50,
-                                outline = 'black', width = 2, fill = 'light green')
+                                outline = 'black', width = 2)
         canvas.create_text(app.mapWidth + 3 * margin, 30 + row * margin + (row + 0.5) * 50,
                             anchor = 'w', text = info, font = 'Arial 12 bold')
 
