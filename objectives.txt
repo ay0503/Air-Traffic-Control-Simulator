@@ -1,0 +1,12 @@
+generate runways, airport (size)
+size based random (constraint (runways))
+
+airport:
+plane size limits
+
+creating data
+
+### CRITICAL ###
+AUTOMATIC MAP GENERATION
+INPUT EXECUTION, HANDLING
+**AI** 
