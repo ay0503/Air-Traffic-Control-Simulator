@@ -35,6 +35,7 @@ def newPos(width, height):
     choices = [[x, 0], [0, y], [width, y], [x, height]]
     return random.choice(choices)
 
+# TODO create heading generation based on quadrants
 def newHeading(pos, width, height):
     if pos[0] == 0:
         return int(random.randrange(40, 120))

@@ -1,20 +1,36 @@
 import string, math, time
 from airline_data import airlines, airlineHubs
 from airport_data import airports
-
+import decimal
 time = time.time()
 
 # helper functions
 
+def distance(a, b):
+    return ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5
+
+def almostEqual(d1, d2, epsilon=10**-7):
+    # note: use math.isclose() outside 15-112 with Python version 3.5 or later
+    return (abs(d2 - d1) < epsilon)
+
+def roundHalfUp(d):
+    # Round to nearest with ties going away from zero.
+    rounding = decimal.ROUND_HALF_UP
+    # See other rounding options here:
+    # https://docs.python.org/3/library/decimal.html#rounding-modes
+    return int(decimal.Decimal(d).to_integral_value(rounding=rounding))
+
 def checkSafety(aircrafts):
+    # !BUG rechecks same aircraft and changes safety status
     for fl1 in aircrafts:
         for fl2 in aircrafts:
             if fl1.pos != fl2.pos:
-                distance = ((fl1.pos[0] - fl2.pos[0]) ** 2 + (fl1.pos[1] - fl2.pos[1]) ** 2) ** 0.5
+                d = distance(fl1.pos, fl2.pos)
                 altDiff = abs(fl1.alt - fl2.alt)
-                if distance < 80 and altDiff < 500:
+                if d < 80 and altDiff < 500:
                     fl1.safe = fl2.safe = False
-                elif distance < 30 and altDiff < 60:
+                elif d < 30 and altDiff < 60:
+                    fl1.safe = fl2.safe = False
                     fl1.crash = fl2.crash = True
                 else: 
                     fl1.safe = fl2.safe = True
@@ -32,7 +48,7 @@ def vectorHeading(p1, p2):
 
 def hdgVector(hdg, spd):
     angle = math.radians((360 - (hdg + 270) % 360) % 360)
-    return spd * math.cos(angle), spd * math.sin(angle)
+    return [spd * math.cos(angle), spd * math.sin(angle)]
 
 def checkDirection(currHdg, hdg):
     if hdg == 0: hdg = 360
@@ -76,6 +92,8 @@ class Aircraft(object):
         self.vs = vs
         self.start = start
         self.end = end
+        # TODO create type of aircraft (new class)
+        #self.type = type
         self.acc = 0
         self.bank = 0
         self.altCon = -1
@@ -180,7 +198,7 @@ class Aircraft(object):
 
     # TODO need to account for drift 
     def directWaypoint(self, waypoint):
-        hdg = vectorHeading(self.pos, waypoint)
+        hdg = vectorHeading(self.pos, waypoint.pos)
         self.changeHeading(hdg)
 
     # TODO create takeoff
@@ -188,7 +206,7 @@ class Aircraft(object):
         pass
 
     # TODO create ILS and ILS capture system
-    def followILS(self, runway):
+    def interceptILS(self, runway):
         if abs(self.hdg - runway.hdg) < 30:
             self.changeHeading(runway.hdg)
 
@@ -196,6 +214,12 @@ class Aircraft(object):
     def checkArrival(self, runway):
         pass
 
+
+class Waypoint(object):
+
+    def __init__(self, name, pos):
+        self.name = name
+        self.pos = pos
 
 class Airline(object):
 
@@ -224,6 +248,8 @@ class Runways(object):
     def __init__(self, pos, hdg, length):
         self.pos = pos
         self.hdg = hdg
+        self.num = roundHalfUp(hdg / 10)
         self.length = length
+        self.beacon = map(lambda x,y:x+y, self.pos, hdgVector(self.hdg, 100 * self.length))
 
-    
+

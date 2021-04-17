@@ -102,15 +102,17 @@ def drawAirport(app, canvas):
                         cy + runway[1] + dy, 
                         fill = app.color, width = 3)
         #TODO draw ILS wing
-        #canvas.create_polygon(cx + runway[0], )
+        """ canvas.create_oval(runway.beacon[0] - 2, runway.beacon[1] - 2, 
+                            runway.beacon[0] + 2, runway.beacon[1] + 2,
+                            fill = "blue") """
 
 # draws aircraft and information
 def drawAircraft(app, canvas, plane):
     info = f"{plane.callsign}, {plane.hdg}°, {plane.spd}kt, {int(plane.alt)}ft, {plane.vs}ft/m"
     x, y = plane.pos
     r = 40
-    if plane.safe: safetyColor = 'light green'
-    else: safetyColor = 'red'
+    if not plane.safe: safetyColor = 'red'
+    else: safetyColor = 'light green'
     # aircraft
     canvas.create_rectangle(x - 5, y - 5, x + 5, y + 5, outline = app.color)
     # pointer
