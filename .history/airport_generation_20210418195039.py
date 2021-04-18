@@ -45,7 +45,7 @@ def newLength(airport):
         return random.randrange(6000 + diff * 1000, 7000 + diff * 1000)
 
 def newRwyPos(base, hdg, length):
-    normRwy = normalVector(hdgVector(hdg, length / 1500))
+    normRwy = normalVector(hdgVector(hdg, length / 150))
     pos = list(map(lambda x,y: x+y, airport.pos, normRwy))
     return pos
 

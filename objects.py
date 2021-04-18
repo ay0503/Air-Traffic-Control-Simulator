@@ -153,10 +153,7 @@ class Flight(object):
     def changeSpd(self, spd):
         if self.spd != spd:
             sign = int((spd - self.spd) / abs((spd - self.spd)))
-            self.acc = sign * 2
-            self.spdCon = spd
-        else: 
-            self.acc = 0
+            self.acc = sign * 3
             self.spdCon = spd
 
     def changeAlt(self, alt):
@@ -281,7 +278,7 @@ class Runway(object):
         self.num = roundHalfUp(hdg / 10)
         self.length = length 
         self.plength = length / 500
-        self.beacon = list(map(lambda x,y:x+y, self.pos, hdgVector(self.hdg, 10 * self.plength)))
+        self.beacon = list(map(lambda x,y:x+y, self.pos, hdgVector(self.hdg, 12 * self.plength)))
 
     def rangeILS(self):
         norm = normalVector(list(map(lambda x,y: x-y, self.beacon, self.pos)))

@@ -2,8 +2,7 @@ from objects import *
 from airport_data import airports
 from aircraft_data import  aircrafts
 from airline_data import airlines
-from pprint import pprint
-import string, random
+import string, random, pprint
 
 # TODO generate runways rwy ### depends on heading, pos = ### may depend on heading, 
 # TODO MAYBE link continents to continents of airlines
@@ -45,7 +44,7 @@ def newLength(airport):
         return random.randrange(6000 + diff * 1000, 7000 + diff * 1000)
 
 def newRwyPos(base, hdg, length):
-    normRwy = normalVector(hdgVector(hdg, length / 1500))
+    normRwy = normalVector(hdgVector(hdg, length / 3))
     pos = list(map(lambda x,y: x+y, airport.pos, normRwy))
     return pos
 
@@ -64,7 +63,6 @@ def generateAirport(pos):
     airport = Airport(code, pos, runways, size)
     for count in range(runwayCount(airport.size)):
         airport.runways.append(generateRunway(airport))
-        pprint(f"Runway: {vars(airport.runways[count])}")
     return airport
 
-#pprint(f"Airport: {vars(generateAirport([500,400]))}")
+pprint(generateAirport([500,400]))

@@ -1,6 +1,7 @@
 from cmu_112_graphics import *
 from objects import *
 from arrival_generator import *
+from airport_generation import *
 from commands import *
 import time, string
 
@@ -20,12 +21,15 @@ def appStarted(app):
     
     # airports
     # TODO runway generator from data
-    app.airport = Airport("KLAX", [app.mapWidth / 2, app.mapHeight / 2], [], 'F')
+    # pre generation of
+    """ app.airport = Airport("KLAX", [app.mapWidth / 2, app.mapHeight / 2], [], 'F')
     app.airport.runways += [Runway('25L', [0, -6], 251, 12000, app.airport), 
-                            Runway('24R', [0, +11], 251, 12000, app.airport)]
-    """ Runway('25R', [0, -11], 251, 12000, app.airport),
-    Runway('24L', [0, +6], 251, 12000, app.airport), """
-                           
+                            Runway('24R', [0, +11], 251, 12000, app.airport),
+                            Runway('25R', [0, -11], 251, 12000, app.airport),
+                            Runway('24L', [0, +6], 251, 12000, app.airport)] """
+    # random generation
+    app.airport = generateAirport([app.mapWidth / 2, app.mapHeight / 2])
+    pprint(f"Airport: {vars(app.airport)}")
 
     # inital parameters
     app.wind = [123, 12]
@@ -50,7 +54,7 @@ def keyPressed(app, event):
             app.input = app.input[:-1]
         elif event.key == "Enter":
             app.command = "".join(app.input)
-            # TODO check for limits
+            print(app.command)
             executeCommand(app.flights, app.command)
             app.input = []
     if event.key == "Up":
@@ -159,8 +163,8 @@ def drawSidebar(app, canvas):
     canvas.create_text((app.mapWidth + app.width) / 2, 15, text = 'Flights',
                         font = "Arial 14 bold")
     # timer
-    canvas.create_text((app.mapWidth + app.width) / 2, app.mapHeight - 100, text = f'Timer: {int(app.timer)}',
-                        font = "Arial 21 bold")
+    canvas.create_text((app.mapWidth + app.width) / 2, app.mapHeight - 100, 
+                    text = f'Timer: {int(app.timer // 60)}:{int((app.timer % 60))}', font = "Arial 21 bold")
     # draw flight sticks
     if len(app.flights) > 0:
         for row in range(len(app.display)):

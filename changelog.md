@@ -40,7 +40,7 @@ create arrival generator
  - added size limit for airport and size classes for aircraft
  - added aircraft type generation
 
- 4/18/2021 - 6.5 hours
+ 4/18/2021 - 9.7 hours
  - created list scroll function using arrow keys
  - fixed non-linked hub generation bug
  - improved visual information of flight data
@@ -49,4 +49,4 @@ create arrival generator
  - fix command execution bug
  - fix object indexing error for macOS
  - create objects for runways
- - create random airport and runway generation
+ - create random airport and runway generation (TODO: create more realistic runway placement)

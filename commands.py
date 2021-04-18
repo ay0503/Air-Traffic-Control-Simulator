@@ -22,12 +22,6 @@ def findCallsign(cmd, aircrafts):
         # verbal case (spaces)
         if aircraft.fltno() in cmd:
             return aircraft.callsign
-        """ # verbal code case (spaced and non-spaced)
-        callsignS = f"{airlines[aircraft.airlineCode()]} {no}"
-        callsignNS = f"{airlines[aircraft.airlineCode()]}{no}"
-        if callsignS or callsignNS in cmd:
-            #print(aircraft.callsign)
-            return aircraft.callsign  """
             
 def findAltitude(words):
     numbers = []
@@ -77,7 +71,7 @@ def findSpeed(words):
 
 def findSpdCommand(cmd):
     words = cmd.split(" ")
-    keywords = ["accelerate", "decelerate", "speed"]
+    keywords = ["accelerate", "decelerate", "speed", "decel"]
     for keyword in keywords:
         if keyword in words:
             spdComm = words[words.index(keyword):]
@@ -94,20 +88,14 @@ def divideCommand(cmd, flights):
 
 def executeCommand(flights, cmd):
     (callsign, alt, hdg, spd) = divideCommand(cmd, flights)
+    flight = None
     for fl in flights:
         if fl.callsign == callsign:
-            flights = fl
-    if alt != None: flights.changeAlt(int(alt))
-    if hdg != None: flights.changeHeading(int(hdg))
-    if spd != None: flights.changeSpd(int(spd))
-
-""" def testDivideCommand():
-    print("Testing command recognition")
-    print(divideCommand("DAL123 fly heading 230 climb to 3000", flights) == "DAL123", 3000, 230, None)
-    print(divideCommand("DAL 123 descend to 2000", flights) == "DAL123", 2000, None, None)
-    print(divideCommand("Delta 3232 decelerate to 210", flights) == "DAL123", None, None, 210)
-    print(divideCommand("Korean123 turn right heading 350", flights) == "KAL123", None, 350, None)
-    print("Passed") """
+            flight = fl
+    if flight != None:
+        if alt != None: flight.changeAlt(int(alt))
+        if hdg != None: flight.changeHeading(int(hdg))
+        if spd != None: flight.changeSpd(int(spd))
 
 def testDivideCommand():
     print("Testing command recognition")
@@ -115,6 +103,7 @@ def testDivideCommand():
     assert(divideCommand("DAL 123 descend to 2000", flights) == ('DAL123', '2000', None, None))
     assert(divideCommand("Delta 3232 decelerate to 210", flights) == ('DAL3232', None, None, '210'))
     assert(divideCommand("Korean Air 123 turn right heading 350", flights) == ('KAL123', None, '350', None))
+    assert(divideCommand("DAL123 decelerate to 200", flights) == ('DAL123', None, None, "200"))
     print("Passed")
 
 testDivideCommand()

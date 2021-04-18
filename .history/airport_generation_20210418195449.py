@@ -32,7 +32,7 @@ def runwayCount(size):
     mass = ord(size) - ord("A")
     if mass < 2:
         return 1
-    return mass
+    return mass - 1
 
 # runway parameters
 def newLength(airport):

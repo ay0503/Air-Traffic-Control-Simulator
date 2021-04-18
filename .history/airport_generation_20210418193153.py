@@ -45,7 +45,7 @@ def newLength(airport):
         return random.randrange(6000 + diff * 1000, 7000 + diff * 1000)
 
 def newRwyPos(base, hdg, length):
-    normRwy = normalVector(hdgVector(hdg, length / 1500))
+    normRwy = normalVector(hdgVector(hdg, length / 3))
     pos = list(map(lambda x,y: x+y, airport.pos, normRwy))
     return pos
 
@@ -64,7 +64,7 @@ def generateAirport(pos):
     airport = Airport(code, pos, runways, size)
     for count in range(runwayCount(airport.size)):
         airport.runways.append(generateRunway(airport))
-        pprint(f"Runway: {vars(airport.runways[count])}")
+        pprint("Runways: {vars(airport.runways[count]}")
     return airport
 
-#pprint(f"Airport: {vars(generateAirport([500,400]))}")
+pprint(vars(generateAirport([500,400])))
