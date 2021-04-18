@@ -7,7 +7,6 @@ import string, random
 # TODO generate runways rwy ### depends on heading, pos = ### may depend on heading, 
 # TODO MAYBE link continents to continents of airlines
 
-# continent codes https://en.wikipedia.org/wiki/ICAO_airport_code#/media/File:ICAO_FirstLetter.svg
 continentCodes = ["K", "C", "S", "U", "Z", "R", "Y", "V", "B", "O", "E", "L"]
 letters = list(string.ascii_uppercase)
 airport = Airport("KLAX", [0,0], [], 'A')

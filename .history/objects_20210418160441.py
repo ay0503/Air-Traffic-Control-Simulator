@@ -260,7 +260,7 @@ class Airport(object):
         self.pos = pos
         self.code = code
         self.runways = runways
-        self.size = size
+        self.limit = size
         self.busy = size
 
     def name(self):
