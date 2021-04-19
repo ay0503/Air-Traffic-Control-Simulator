@@ -1,7 +1,7 @@
 import string, math, time
 from airline_data import airlines, airlineHubs
 from airport_data import airports
-import decimal, random
+import decimal, random, copy
 time = time.time()
 
 # helper functions
@@ -36,7 +36,6 @@ def checkSafety(aircrafts):
                 else: 
                     fl1.safe = fl2.safe = True
 
-#! BUG heading isn't correct
 def vectorHdg(p1, p2):
     d = (p2[0] - p1[0], p2[1] - p1[1])
     if d[0] == 0:
@@ -80,10 +79,6 @@ def testCheckDirection():
     assert(checkDirection(120, 80) == False)
     assert(checkDirection(188, 291) == True)
     print("Passed")
-
-def runwayILS(pos, hdg):
-    x0 = pos
-    x1, x2 = hdgVector(hdg, 100)
     
 testCheckDirection()
 
@@ -179,36 +174,18 @@ class Flight(object):
 
     def check_constraints(self):
         self.hdg %= 360
-        if self.vs > 0:
-            if self.alt >= self.altCon:
-                self.vs = 0
-                self.alt = self.altCon
-                self.altCon = -1
-        elif self.vs < 0:
-            if self.alt <= self.altCon:
-                self.vs = 0
-                self.alt = self.altCon
-                self.altCon = -1
-        if self.acc > 0:
-            if self.spd >= self.spdCon:
-                self.acc = 0
-                self.spd = self.spdCon
-                self.spdCon = -1
-        elif self.acc < 0:
-            if self.spd <= self.spdCon:
-                self.acc = 0
-                self.spd = self.spdCon
-                self.spdCon = -1
-        if self.bank > 0:
-            if self.hdg >= self.hdgCon:
-                self.bank = 0
-                self.hdg = self.hdgCon
-                self.hdgCon = -1
-        elif self.bank < 0:
-            if self.hdg <= self.hdgCon:
-                self.bank = 0
-                self.hdg = self.hdgCon
-                self.hdgCon = -1
+        if abs(self.alt - self.altCon) <= 80:
+            self.vs = 0
+            self.alt = self.altCon
+            self.altCon = -1
+        if abs(self.spd - self.spdCon) <= 2:
+            self.acc = 0
+            self.spd = self.spdCon
+            self.spdCon = -1
+        if abs(self.hdg - self.hdgCon) <= 2:
+            self.bank = 0
+            self.hdg = self.hdgCon
+            self.hdgCon = -1
 
     def direct_waypoint(self, waypoint):
         req_hdg = vectorHdg(self.pos, waypoint.pos)
@@ -221,26 +198,54 @@ class Flight(object):
         
 class Departure(Flight):
 
-    def __init__(self):
-        pass
+    def __init__(self, callsign, type, pos, hdg, spd, alt, vs, start, end, runway):
+        super().__init__(callsign, type, pos, hdg, spd, alt, vs, start, end)
+        self.cleared = False
+        self.departed = False
+        self.runway = runway
 
-    # TODO create takeoff
-    def takeoff(self, runway):
-        pass
+    def move(self):
+        if self.cleared:
+            self.takeoff()
+        self.pos[0] += hdgVector(self.hdg, self.spd / 100)[0]
+        self.pos[1] -= hdgVector(self.hdg, self.spd / 100)[1]
+        self.alt += self.vs / 25
+        self.hdg += self.bank
+        self.spd += self.acc
+        if self.direct != None:
+            self.direct_waypoint(self.direct)
+
+    def clear_takeoff(self):
+        self.cleared = True
+
+    # TODO replace with vspeed
+    def takeoff(self):
+        if self.spd < 150:
+            self.acc = 7
+        else:
+            self.vs = 3000
+            self.acc = 7
+            if self.alt > 1000:
+                self.vs = 2000
+                self.acc = 0
+                self.departed = True
 
 class Arrival(Flight):
+
+    def __init__(self, callsign, type, pos, hdg, spd, alt, vs, start, end):
+        super().__init__(callsign, type, pos, hdg, spd, alt, vs, start, end)
+        self.ILS = False
     
-    def __init__(self):
-        pass
+    def check_ILS(self, runways):
+        for runway in runways:
+            if distance(self.pos, runway.beacon) < 50 and abs(self.hdg - runway.hdg) < 30:
+                self.ILS = True
+                self.runway = runway
+                self.intercept_ILS(runway)
 
-    # TODO check for ILS landings
-    def check_arrival(self, runway):
-        pass
-
-    # TODO create ILS and ILS capture system
+    # TODO follow localizer
     def intercept_ILS(self, runway):
-        if abs(self.hdg - runway.hdg) < 30:
-            self.change_hdg(runway.hdg)
+        self.direct_waypoint(runway)
 
 class Aircraft(object):
     
@@ -250,6 +255,7 @@ class Aircraft(object):
         self.size = size
         self.freq = freq
 
+# TODO maybe add waypoints to ILS line
 class Waypoint(object):
 
     def __init__(self, name, pos):
@@ -266,12 +272,13 @@ class Airline(object):
 # TODO create time, size based traffic
 class Airport(object):
 
-    def __init__(self, code, pos, runways, size):
+    def __init__(self, code, pos, runways, size, wind):
         self.pos = pos
         self.code = code
         self.runways = runways
         self.size =  self.traffic = size
         self.waypoints = []
+        self.wind = wind
 
     def name(self):
         return airports[self.code]
@@ -283,16 +290,20 @@ class Airport(object):
         return True
 
     def create_waypoints(self, width, height):
-        letters = list(string.ascii_uppercase)
         # TODO modify frequency of random name lengths
         for i in range(15 * (ord(self.size) - ord("A") + 1)):
             x, y = random.randrange(100, width - 100), random.randrange(50, height - 50)
             name = ''
-            length = random.randrange(3,6)
+            length = random.randrange(2,5)
             for i in range(length):
+                letters = list(string.ascii_uppercase)
+                if i == 0:
+                    letters.remove(self.code[0])
+                    name += random.choice(letters)
                 name += random.choice(letters)
             self.waypoints.append(Waypoint(name, [x, y]))
 
+# TODO divide into depart and arrive
 class Runway(object):
     
     def __init__(self, rwy, pos, hdg, length, airport):
@@ -302,7 +313,8 @@ class Runway(object):
         self.num = roundHalfUp(hdg / 10)
         self.length = length
         self.plength = self.length / 500
-        self.beacon = list(map(lambda x,y:x+y, self.pos, hdgVector(self.hdg, 12 * self.plength)))
+        self.beacon = [self.pos[0] + hdgVector(self.hdg, 12 * self.plength)[0], 
+                        self.pos[1] - hdgVector(self.hdg, 12 * self.plength)[1]]
 
     def range_ILS(self):
         norm = normalVector(list(map(lambda x,y: x-y, self.beacon, self.pos)))

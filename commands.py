@@ -3,7 +3,7 @@ from objects import *
 from airline_data import airlines
 from airport_data import airports
 from airport_generation import *
-from arrival_generator import *
+from flight_generator import *
 
 testAirport = generateAirport([500, 500])
 testAirport.waypoints.append(Waypoint("BELLY", [0,0]))
@@ -101,22 +101,33 @@ def findSpdCommand(cmd):
             return findSpeed(spdComm)
     return None
 
+def findTakeoffClearance(cmd):
+    words = cmd.split(" ")
+    keywords = ["cleared", "takeoff"]
+    for keyword in keywords:
+        if keyword not in words:
+            return False
+    return True
+
 # keyword based command recognition
 def divideCommand(cmd, flights, airport):
     callsign = findCallsign(cmd, flights)
     alt = findAltCommand(cmd)
     wpt = findDirectCommand(cmd, airport)
+    clr = findTakeoffClearance(cmd)
     hdg = findHdgCommand(cmd)
     spd = findSpdCommand(cmd)
-    return (callsign, alt, wpt, hdg, spd)
+    return (callsign, alt, wpt, hdg, spd, clr)
 
 def executeCommand(flights, airport, cmd):
-    (callsign, alt, wpt, hdg, spd) = divideCommand(cmd, flights, airport)
+    (callsign, alt, wpt, hdg, spd, clr) = divideCommand(cmd, flights, airport)
     flight = None
     for fl in flights:
         if fl.callsign == callsign:
             flight = fl
     if flight != None:
+        if type(flight) == Departure:
+            flight.clear_takeoff()
         if alt != None: flight.change_alt(int(alt))
         if wpt != None: flight.direct_waypoint(wpt)
         if hdg != None: flight.change_hdg(int(hdg))
@@ -124,12 +135,12 @@ def executeCommand(flights, airport, cmd):
 
 def testDivideCommand():
     print("Testing Command Recognition")
-    assert(divideCommand("DAL123 fly heading 230 climb to 3000", testFlights, testAirport) == ('DAL123', '3000', None, '230', None))
-    assert(divideCommand("DAL 123 descend to 2000", testFlights, testAirport) == ('DAL123', '2000', None, None, None))
-    assert(divideCommand("Delta 3232 decelerate to 210", testFlights, testAirport) == ('DAL3232', None, None, None, '210'))
-    assert(divideCommand("DAL 123 direct to BELLY", testFlights, testAirport) == ('DAL123', None, testAirport.waypoints[0], None, None))
-    assert(divideCommand("Korean Air 123 turn right heading 350", testFlights, testAirport) == ('KAL123', None, None, '350', None))
-    assert(divideCommand("DAL123 decelerate to 200", testFlights, testAirport) == ('DAL123', None, None, None, "200"))
+    assert(divideCommand("DAL123 fly heading 230 climb to 3000", testFlights, testAirport) == ('DAL123', '3000', None, '230', None, False))
+    assert(divideCommand("DAL 123 descend to 2000", testFlights, testAirport) == ('DAL123', '2000', None, None, None, False))
+    assert(divideCommand("Delta 3232 decelerate to 210", testFlights, testAirport) == ('DAL3232', None, None, None, '210', False))
+    assert(divideCommand("DAL 123 direct to BELLY", testFlights, testAirport) == ('DAL123', None, testAirport.waypoints[0], None, None, False))
+    assert(divideCommand("Korean Air 123 turn right heading 350", testFlights, testAirport) == ('KAL123', None, None, '350', None, False))
+    assert(divideCommand("DAL123 decelerate to 200", testFlights, testAirport) == ('DAL123', None, None, None, "200", False))
     print("Passed")
 
 testDivideCommand()

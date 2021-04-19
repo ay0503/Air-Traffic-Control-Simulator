@@ -52,7 +52,11 @@ create arrival generator
  - create random airport and runway generation (TODO: create more realistic runway placement)
  - temporarily reverted to static length
 
- 4/19/2021 - 3.1 hours
- - prepared departure, arrival classes for implementation
+ 4/19/2021 - 6.2 hours
+ - divided flights to departure and arrival classes for future feature implementation
  - added direct to waypoint feature
  - added trajectory visualizer
+ - changed waypoint name generation so first letter does not equal airport's first letter
+ - runway heading bug fixed
+ - created takeoff feature for departure class aircraft
+ - departure aircraft now have objective waypoints that pass the flight on to a different controller

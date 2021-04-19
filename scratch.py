@@ -18,7 +18,4 @@ def hdgVector(hdg, spd):
 #print("heading = ", heading, "angle = ", hdgVector(heading, 300))
     
 L = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
-selection = L[0:5]
-print(selection)
-selection = L[1:6]
-print(selection)
+

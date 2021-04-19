@@ -30,22 +30,23 @@ def moveIsLegal(board, x, y, move, moves):
         return True
     return False
 
-def findRoute(board, x, y, moves):
+def findRoute(board, x, y, moves = [[0, 1], [0, 1]]):
     end = start
     moveset = [[1, 0], [-1, 0], [0, 1]]
     if (x, y) == (end, len(board)):
         return board
     for move in moveset:
-        if moveIsLegal(board, x, y, move, moves):
-            newx, newy = (x + move[0], y + move[1])
-            moves = [move]
+        newx, newy = (x + move[0], y + move[1])
+        moves += [move]
+        if moveIsLegal(board, newx, newy, move, moves):
             board[newy][newx] = 1
             solution = findRoute(board, newx, newy, moves)
             if solution != None:
                 return solution
-            # backtrack move
-            moves.pop()
-            board[newx][newy] = 0
+    # backtrack move
+    newx, newy = x, y
+    moves.pop()
+    board[newx][newy] = 0
     return None
 
-print(findRoute(board, 400, 0, []))
+print(findRoute(board, 25, 0, []))
