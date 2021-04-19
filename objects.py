@@ -9,10 +9,6 @@ time = time.time()
 def distance(a, b):
     return ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5
 
-def almostEqual(d1, d2, epsilon=10**-7):
-    # note: use math.isclose() outside 15-112 with Python version 3.5 or later
-    return (abs(d2 - d1) < epsilon)
-
 def roundHalfUp(d):
     # Round to nearest with ties going away from zero.
     rounding = decimal.ROUND_HALF_UP
@@ -57,14 +53,9 @@ def normalVector(vector):
 
 def checkDirection(currHdg, hdg):
     if hdg == 0: hdg = 360
-    if hdg > currHdg:
-        if hdg - currHdg > 180:
-            return False
-        return True
-    else: 
-        if hdg - currHdg < -180:
-            return True
+    if hdg - currHdg >= 180 or -180 <= hdg - currHdg <= 0:
         return False
+    else: return True
 
 def testCheckDirection():
     print('Testing checkDirection()')

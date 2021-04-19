@@ -69,7 +69,7 @@ def newHeading(pos, width, height):
 
 def newArrivalRoute(code, airport):
     start = random.choice(airlineHubs[code])
-    end = airport.code
+    end = airport.code 
     return start, end
 
 def newDepartureRoute(airport):
@@ -88,6 +88,7 @@ def createArrival(width, height, airport):
 
 def createDeparture(airport):
     runway = random.choice(airport.runways)
+    print(runway, runway.hdg, runway.num)
     pos = copy.copy(runway.pos)
     callsign = newCallsign()
     type = newType(aircrafts)
