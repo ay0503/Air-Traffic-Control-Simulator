@@ -10,6 +10,17 @@ UAL, United, KIAD, KJFK
 AFL, Air France, LFPO, LFPG
 DLH, Lufthansa, EDDF, EDDM
 AAR, Asiana, RKSI, RKSS
+CAL, China Airlines, RCTP
+CPA, Cathay Pacific, VHHH
+UAE, Emirates, OMDB
+FDX, Fedex, KMIA, KDFW, KMEM
+KLM, KLM, EHAM
+QFA, Qantas, YSSY, YPPH, YMML
+SWR, Swiss Air, LSZH
+SQC, Singapore, WSSS
+THA, Thai Airways, VTBS
+THY, Turkish Airlines, LFTM
+CLX, Cargolux, ELLX
 
 """
 
@@ -27,5 +38,3 @@ for line in airlineList.splitlines():
         if len(data) > 0:
             code = line.split(", ")[0]
             airlineHubs[code] = airlineHubs.get(code, hubs) + [hub]
-
-#print(airlineHubs['JAL'])

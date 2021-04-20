@@ -1,11 +1,19 @@
-import random
+import random, math
+from cmu_112_graphics import *
 
-width, height = 50,50
-board = [[0] * width for row in range(height)]
-half = [0.5, 1]
+width, height = 360, 360
+board = [([0] * width) for row in range(height)]
 
-start = random.randrange(random.randrange(0, width))
+def f(x, y):
+    x, y = math.radians(x), math.radians(y)
+    return math.sin(x) ** 10 + math.cos(10 + y * x) * math.cos(x)
 
+for y in range(height):
+    for x in range(width):
+        board[y][x] = f(x, y)
+
+
+# returns cell bounds of a cell of the row and column
 def getCellBounds(app, row, col):
     gridWidth  = app.width - 2 * app.margin
     gridHeight = app.height - 2 * app.margin
@@ -15,38 +23,36 @@ def getCellBounds(app, row, col):
     y1 = app.margin + gridHeight * (row + 1) / app.rows
     return (x0, y0, x1, y1)
 
-""" def moveIsLegal(board, x, y, move, moves):
-    avg = (start + len(board[0])) / 2
-    newx, newy = (x + move[0], y + move[1])
-    if (0 <= newx < len(board[0]) and 0 <= newy < len(board) and
-        start / 2 < x < avg and ([0, 1] not in moves[-2:])): 
-        return True
-    return False """
+print(board)
 
-def moveIsLegal(board, x, y, move, moves):
-    avg = (start + len(board[0])) / 2
-    newx, newy = (x + move[0], y + move[1])
-    if (0 <= newx < len(board[0]) and 0 <= newy < len(board) and ([0, 1] in moves[-2:])): 
-        return True
-    return False
+def rgbString(r, g, b):
+    # Don't worry about the :02x part, but for the curious,
+    # it says to use hex (base 16) with two digits.
+    return f'#{r:02x}{g:02x}{b:02x}'
 
-def findRoute(board, x, y, moves = [[0, 1], [0, 1]]):
-    end = start
-    moveset = [[1, 0], [-1, 0], [0, 1]]
-    if (x, y) == (end, len(board)):
-        return board
-    for move in moveset:
-        newx, newy = (x + move[0], y + move[1])
-        moves += [move]
-        if moveIsLegal(board, newx, newy, move, moves):
-            board[newy][newx] = 1
-            solution = findRoute(board, newx, newy, moves)
-            if solution != None:
-                return solution
-    # backtrack move
-    newx, newy = x, y
-    moves.pop()
-    board[newx][newy] = 0
-    return None
+def appStarted(app):
+    app.board = board
+    app.rows = len(app.board)
+    app.cols = len(app.board[0])
+    app.margin = 5
 
-print(findRoute(board, 25, 0, []))
+def drawCell(app, canvas, row, col, color):
+    x0, y0, x1, y1 = getCellBounds(app, row, col)
+    canvas.create_rectangle(x0, y0, x1, y1, fill = color,
+                                    width = 3)
+
+def drawBoard(app, canvas):
+    for row in range(app.rows):
+        for col in range(app.cols):
+            color = abs(int(board[row][col] * 255))
+            drawCell(app, canvas, row, col, rgbString(color, color, color))
+
+def redrawAll(app, canvas):
+    drawBoard(app, canvas)
+
+for row in range(len(board)):
+    for col in  range(len(board[0])):
+        if board[row][col] < 0.5:
+            board[row][col] = 0
+
+runApp(width = 1920, height = 1080)

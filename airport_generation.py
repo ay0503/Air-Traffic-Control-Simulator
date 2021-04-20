@@ -61,7 +61,7 @@ def generateWind(runways):
     spd = random.randrange(2,15)
     avg = 0
     for runway in runways:
-        avg += runway.hdg
+            avg += runway.hdg
     return [avg / len(runways), spd]
 
 def generateAirport(pos):
@@ -74,3 +74,8 @@ def generateAirport(pos):
         #pprint(f"Runway: {vars(airport.runways[count])}")
     airport.wind = generateWind(runways)
     return airport
+
+
+"""         if runway.hdg > 180:
+            avg += ((runway.hdg + 180) % 360)
+        else: """

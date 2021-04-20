@@ -77,23 +77,42 @@ def newDepartureRoute(airport):
     end = random.choice(airport.waypoints).name
     return start, end
 
+# 25% fuel remaining average during approach
+def newArrivalFuel(size):
+    if size == 'A':
+        fuel = 0.25 * 535
+    else: 
+        # based on linear regression of aircraft fuel capacity data
+        fuel = 0.25 * ((ord(size) - ord("A")) * 42742 - 82945)
+    return fuel
+
+def newDepartureFuel(size):
+    if size == 'A':
+        fuel = 535
+    else: 
+        # based on linear regression of aircraft fuel capacity data
+        fuel = ((ord(size) - ord("A")) * 42742 - 82945)
+    return fuel
+
 def createArrival(width, height, airport):
     pos = newPos(width, height)
     callsign = newCallsign()
     type = newType(aircrafts)
     code = callsignToAirline(callsign)
+    fuel = newArrivalFuel(type.size)
     start, end = newArrivalRoute(code, airport)
     return Arrival(callsign, type, pos, newHeading(pos, width, height), 
-                    newSpeed(), newAltitude(), 0, start, end)
+                    newSpeed(), newAltitude(), 0, start, end, fuel)
 
 def createDeparture(airport):
     runway = random.choice(airport.runways)
     pos = copy.copy(runway.pos)
     callsign = newCallsign()
     type = newType(aircrafts)
+    fuel = newDepartureFuel(type.size)
     start, end = newDepartureRoute(airport)
     return Departure(callsign, type, pos, copy.copy(runway.hdg), 
-                    0, 0, 0, start, end, runway)
+                    0, 0, 0, start, end, runway, fuel)
 
 #print(newType(aircrafts))
 #pprint(vars(createArrival(123, 123, KLAX)))

@@ -60,3 +60,16 @@ create arrival generator
  - runway heading bug fixed
  - created takeoff feature for departure class aircraft
  - departure aircraft now have objective waypoints that pass the flight on to a different controller
+
+ 4/20/2021 - 5.5 hours
+ - fixed runway heading bug that caused ILS to not recognize beacon
+ - simplified heading direction algorithm
+ - added fuel features corresponding to aircraft type
+ - added details pane to side bar
+ - added path drawing feature to aircraft
+ - added weather based runway closures to airports
+ - improved waypoint direction algorithm
+ - added low fuel scenario to unsafe states
+ - added new airlines to game
+ - fixed departure speed and altitude bugs
+ - added debug command mode to change flight attributes

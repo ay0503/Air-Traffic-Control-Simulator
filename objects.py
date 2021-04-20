@@ -19,6 +19,8 @@ def roundHalfUp(d):
 def checkSafety(aircrafts):
     #! BUG rechecks same aircraft and changes safety status
     for fl1 in aircrafts:
+        if fl1.fuel < 30:
+            fl1.safe = False
         for fl2 in aircrafts:
             if fl1.pos != fl2.pos:
                 d = distance(fl1.pos, fl2.pos)
@@ -58,7 +60,7 @@ def checkDirection(currHdg, hdg):
     else: return True
 
 def testCheckDirection():
-    print('Testing checkDirection()')
+    print('Testing Heading Direction Algorithm')
     assert(checkDirection(124, 90) == False)
     assert(checkDirection(160, 92) == False)
     assert(checkDirection(20, 340) == False)
@@ -78,7 +80,7 @@ testCheckDirection()
 # TODO add autopilot state for direct, hdg line predictions
 class Flight(object):
     
-    def __init__(self, callsign, type, pos, hdg, spd, alt, vs, start, end):
+    def __init__(self, callsign, type, pos, hdg, spd, alt, vs, start, end, fuel):
         self.callsign = callsign
         self.type = type
         self.pos = pos
@@ -86,17 +88,21 @@ class Flight(object):
         self.spd = spd
         self.alt = alt
         self.vs = vs
+        self.fuelRate = int(fuel / 300)
         self.start = start
         self.end = end
-        # TODO create type of aircraft (new class)
         self.direct = None
         self.acc = 0
         self.bank = 0
-        self.altCon = -1
-        self.hdgCon = -1
-        self.spdCon = -1
+        self.altCon = -100
+        self.hdgCon = -100
+        self.spdCon = -100
+        self.path = []
+        self.draw = []
         self.safe = True
         self.crash = False
+        self.details = ['callsign', 'type', 'hdg', 'spd', 
+                        'alt', 'vs', 'fuel', 'start', 'end']
 
     def airline_code(self):
         code = ''
@@ -125,11 +131,13 @@ class Flight(object):
         return f"{airlines[airline]} {no}"
 
     def move(self):
+        self.path.append(self.pos)
         self.pos[0] += hdgVector(self.hdg, self.spd / 100)[0]
         self.pos[1] -= hdgVector(self.hdg, self.spd / 100)[1]
         self.alt += self.vs / 25
         self.hdg += self.bank
         self.spd += self.acc
+        self.fuel -= self.fuelRate
         if self.direct != None:
             self.direct_waypoint(self.direct)
 
@@ -168,29 +176,32 @@ class Flight(object):
         if abs(self.alt - self.altCon) <= 80:
             self.vs = 0
             self.alt = self.altCon
-            self.altCon = -1
+            self.altCon = -100
         if abs(self.spd - self.spdCon) <= 2:
             self.acc = 0
             self.spd = self.spdCon
-            self.spdCon = -1
+            self.spdCon = -100
         if abs(self.hdg - self.hdgCon) <= 2:
             self.bank = 0
             self.hdg = self.hdgCon
-            self.hdgCon = -1
+            self.hdgCon = -100
 
     def direct_waypoint(self, waypoint):
         req_hdg = vectorHdg(self.pos, waypoint.pos)
         if self.hdg != req_hdg:
             self.direct = waypoint
             self.change_hdg(req_hdg)
-        else: 
-            self.direct = None
+        elif distance(self.pos, waypoint.pos) < 50:
             self.hdg = req_hdg
+            self.direct = None
         
 class Departure(Flight):
 
-    def __init__(self, callsign, type, pos, hdg, spd, alt, vs, start, end, runway):
-        super().__init__(callsign, type, pos, hdg, spd, alt, vs, start, end)
+    def __init__(self, callsign, type, pos, hdg, spd, alt, vs, start, end, runway, fuel):
+        super().__init__(callsign, type, pos, hdg, spd, alt, vs, start, end, fuel)
+        self.alt = 0
+        self.spd = 0
+        self.fuel = fuel
         self.cleared = False
         self.departed = False
         self.runway = runway
@@ -203,6 +214,8 @@ class Departure(Flight):
         self.alt += self.vs / 25
         self.hdg += self.bank
         self.spd += self.acc
+        if self.departed:
+            self.fuel -= self.fuelRate
         if self.direct != None:
             self.direct_waypoint(self.direct)
 
@@ -212,10 +225,10 @@ class Departure(Flight):
     # TODO replace with vspeed
     def takeoff(self):
         if self.spd < 150:
-            self.acc = 7
+            self.acc = 5
         else:
             self.vs = 3000
-            self.acc = 7
+            self.acc = 5
             if self.alt > 1000:
                 self.vs = 2000
                 self.acc = 0
@@ -223,20 +236,38 @@ class Departure(Flight):
 
 class Arrival(Flight):
 
-    def __init__(self, callsign, type, pos, hdg, spd, alt, vs, start, end):
-        super().__init__(callsign, type, pos, hdg, spd, alt, vs, start, end)
+    def __init__(self, callsign, type, pos, hdg, spd, alt, vs, start, end, fuel):
+        super().__init__(callsign, type, pos, hdg, spd, alt, vs, start, end, fuel)
+        self.fuel = fuel
         self.ILS = False
     
     def check_ILS(self, runways):
         for runway in runways:
+            #print(distance(self.pos, runway.beacon), self.hdg, runway.hdg)
             if distance(self.pos, runway.beacon) < 50 and abs(self.hdg - runway.hdg) < 30:
                 self.ILS = True
                 self.runway = runway
                 self.intercept_ILS(runway)
+            if self.ILS:
+                self.capture_gs(self.runway)
+
+    def gs_change_spd(self, spd):
+        if self.spd != spd:
+            sign = int((spd - self.spd) / abs((spd - self.spd)))
+            self.acc = sign * 2
+            self.spdCon = spd
 
     # TODO follow localizer
     def intercept_ILS(self, runway):
         self.direct_waypoint(runway)
+
+    def capture_gs(self, runway):
+        if self.alt < 4000 and distance(self.pos, runway.pos) < 200:
+            time = (distance(self.pos, runway.pos) - 5) / (self.spd / 100)
+            self.vs = - int(self.spd * 6)
+            self.gs_change_spd(140)
+
+# self.vs = int(-self.alt * 60 / 125)
 
 class Aircraft(object):
     
@@ -261,6 +292,7 @@ class Airline(object):
         self.hubs = hubs
 
 # TODO create time, size based traffic
+# TODO create weather based states
 class Airport(object):
 
     def __init__(self, code, pos, runways, size, wind):
@@ -294,18 +326,20 @@ class Airport(object):
                 name += random.choice(letters)
             self.waypoints.append(Waypoint(name, [x, y]))
 
-# TODO divide into depart and arrive
+# TODO divide into depart and arrive (easier to account for wind)
 class Runway(object):
     
     def __init__(self, rwy, pos, hdg, length, airport):
         self.pos = list(map(lambda x, y : x + y, pos, airport.pos))
         self.hdg = hdg
         self.rwy = rwy
+        # TODO WIP average is extreme
+        self.open = True
         self.num = roundHalfUp(hdg / 10)
         self.length = length
         self.plength = self.length / 500
-        self.beacon = [self.pos[0] + hdgVector(self.hdg, 12 * self.plength)[0], 
-                        self.pos[1] - hdgVector(self.hdg, 12 * self.plength)[1]]
+        self.beacon = [self.pos[0] - hdgVector(self.hdg, 12 * self.plength)[0], 
+                        self.pos[1] + hdgVector(self.hdg, 12 * self.plength)[1]]
 
     def range_ILS(self):
         norm = normalVector(list(map(lambda x,y: x-y, self.beacon, self.pos)))
@@ -313,3 +347,5 @@ class Runway(object):
         p3 = list(map(lambda x,y: x + y / 15, self.beacon, norm))
         p1 = self.pos
         return p1, p2, p3
+
+        #abs(self.hdg - airport.wind) < 30 or abs((self.hdg + 180) % 360 - airport.wind) < 30

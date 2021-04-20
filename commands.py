@@ -8,9 +8,9 @@ from flight_generator import *
 testAirport = generateAirport([500, 500])
 testAirport.waypoints.append(Waypoint("BELLY", [0,0]))
 
-testFlights = [Flight('DAL123', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI'),
-        Flight('KAL123', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI'),
-        Flight('DAL3232', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI'),]
+testFlights = [Flight('DAL123', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI', 535),
+        Flight('KAL123', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI', 535),
+        Flight('DAL3232', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI', 535),]
 
 def findCallsign(cmd, aircrafts):
     word = cmd.split(' ')
@@ -109,6 +109,10 @@ def findTakeoffClearance(cmd):
             return False
     return True
 
+def debugCommand(cmd):
+    words = cmd.split(" ")
+    return ("debug" in words)
+
 # keyword based command recognition
 def divideCommand(cmd, flights, airport):
     callsign = findCallsign(cmd, flights)
@@ -118,6 +122,17 @@ def divideCommand(cmd, flights, airport):
     hdg = findHdgCommand(cmd)
     spd = findSpdCommand(cmd)
     return (callsign, alt, wpt, hdg, spd, clr)
+
+def debugExecuteCommand(flights, airport, cmd):
+    (callsign, alt, wpt, hdg, spd, clr) = divideCommand(cmd, flights, airport)
+    flight = None
+    for fl in flights:
+        if fl.callsign == callsign:
+            flight = fl
+    if flight != None:
+        if alt != None: flight.alt = int(alt)
+        if hdg != None: flight.hdg = int(hdg)
+        if spd != None: flight.spd = int(spd)
 
 def executeCommand(flights, airport, cmd):
     (callsign, alt, wpt, hdg, spd, clr) = divideCommand(cmd, flights, airport)
