@@ -73,7 +73,6 @@ def generateAirport(pos):
         airport.runways.append(generateRunway(airport))
         #pprint(f"Runway: {vars(airport.runways[count])}")
     airport.wind = generateWind(runways)
-    print(vars(airport))
     return airport
 
 

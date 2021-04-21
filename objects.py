@@ -18,6 +18,7 @@ def roundHalfUp(d):
 
 def checkSafety(aircrafts):
     #! BUG rechecks same aircraft and changes safety status
+    # TODO create more lose scenarios
     for fl1 in aircrafts:
         if fl1.fuel < 30:
             fl1.safe = False
@@ -302,7 +303,6 @@ class Airport(object):
         self.size =  self.traffic = size
         self.waypoints = []
         self.wind = wind
-        print(self.wind)
 
     def name(self):
         return airports[self.code]
