@@ -11,7 +11,7 @@ import string, random
 # continent codes https://en.wikipedia.org/wiki/ICAO_airport_code#/media/File:ICAO_FirstLetter.svg
 continentCodes = ["K", "C", "S", "U", "Z", "R", "Y", "V", "B", "O", "E", "L"]
 letters = list(string.ascii_uppercase)
-airport = Airport("KLAX", [0,0], [], 'A', [330, 12])
+#airport = Airport("KLAX", [0,0], [], 'A', [330, 12])
 sizes = ["A", "B", "C", "D", "E", "F"]
 
 #* size guideline  
@@ -44,16 +44,16 @@ def newLength(airport):
         diff = ord(airport.size) - ord("A")
         return random.randrange(6000 + diff * 1000, 7000 + diff * 1000) """
 
-def newRwyPos(base, hdg, length):
+def newRwyPos( hdg, length):
     normRwy = normalVector(hdgVector(hdg, length / 1500))
-    pos = list(map(lambda x,y: x+y, airport.pos, normRwy))
+    pos = list(map(lambda x,y: x+y, [0,0], normRwy))
     return pos
 
 # TODO generate parallel runway possibilities
 def generateRunway(airport):
     hdg = random.randrange(0, 360)
     length = 11000
-    pos = newRwyPos(airport.pos, hdg, length)
+    pos = newRwyPos(hdg, length)
     rwy = roundHalfUp(hdg / 10)
     return Runway(rwy, pos, hdg, length, airport)
 
@@ -62,7 +62,7 @@ def generateWind(runways):
     avg = 0
     for runway in runways:
             avg += runway.hdg
-    return [avg / len(runways), spd]
+    return [int(avg / len(runways)), spd]
 
 def generateAirport(pos):
     code = generateCode()
@@ -73,6 +73,7 @@ def generateAirport(pos):
         airport.runways.append(generateRunway(airport))
         #pprint(f"Runway: {vars(airport.runways[count])}")
     airport.wind = generateWind(runways)
+    print(vars(airport))
     return airport
 
 

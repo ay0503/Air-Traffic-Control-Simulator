@@ -279,7 +279,7 @@ def drawWind(app, canvas):
                         fill = app.color, width = 2)
     canvas.create_text(app.mapWidth - 40 - r, 30 + r / 2, anchor = 'e',
                         font = 'Arial 8', fill = app.color,
-                        text = f'{app.airport.wind[0]} at {app.airport.wind[1]} kts')
+                        text = f'{int(app.airport.wind[0])} at {app.airport.wind[1]} kts')
 
 def redrawAll(app, canvas):
     drawBackground(app, canvas)

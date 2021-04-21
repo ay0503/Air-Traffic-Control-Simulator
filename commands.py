@@ -158,4 +158,4 @@ def testDivideCommand():
     assert(divideCommand("DAL123 decelerate to 200", testFlights, testAirport) == ('DAL123', None, None, None, "200", False))
     print("Passed")
 
-testDivideCommand()
+#testDivideCommand()

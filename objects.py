@@ -302,6 +302,7 @@ class Airport(object):
         self.size =  self.traffic = size
         self.waypoints = []
         self.wind = wind
+        print(self.wind)
 
     def name(self):
         return airports[self.code]

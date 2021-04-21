@@ -4,7 +4,7 @@ from airport_data import airports
 from aircraft_data import aircrafts
 import random, copy
 
-airport = Airport("KLAX", [0,0], [], 'A', [330, 12])
+#airport = Airport("KLAX", [0,0], [], 'A', [330, 12])
 
 def randNo(len):
     return random.randrange(10 ** (len - 1), 10 ** len)

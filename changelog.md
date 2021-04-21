@@ -72,4 +72,8 @@ create arrival generator
  - added low fuel scenario to unsafe states
  - added new airlines to game
  - fixed departure speed and altitude bugs
+
+ 4/21/2021 - 
  - added debug command mode to change flight attributes
+ - simplified runway heading generation
+ - wind generation fix
