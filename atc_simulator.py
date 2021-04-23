@@ -30,6 +30,7 @@ def appStarted(app):
     app.startTime = time.time()
     app.type = False
     app.draw = []
+    app.pro = True
     
     # airports
     #* GAMEMODES: Real World Data, Random Generated Data, Maybe? Custom building
@@ -46,7 +47,7 @@ def appStarted(app):
     app.airport = generateAirport([app.mapWidth / 2, app.mapHeight / 2])
     app.airport.create_waypoints(app.mapWidth, app.mapHeight)
     print("Size:", app.airport.size)
-    #pprint(f"Airport: {vars(app.airport)}")
+    pprint(f"Airport: {vars(app.airport)}")
 
     # inital parameters
     app.timerDelay = 1000
@@ -106,7 +107,6 @@ def mouseDragged(app, event):
     if app.selected != None:
         app.selected.pos = [event.x, event.y]
     app.draw.append((event.x, event.y))
-    print(app.draw)
 
 def timerFired(app):
     """ print(list(map(lambda x: x.callsign, app.flights)))
@@ -123,7 +123,7 @@ def timerFired(app):
             flight.check_ILS(app.airport.runways)
     checkSafety(app.flights)
     # create arrivals every 30 seconds
-    if app.timer % 10 == 0 and app.timer > 0:
+    if app.timer % 10 == 0 and app.timer > 0 and len(app.flights) < 10:
         app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
         """ if not flight.check_on_grid(app.mapWidth, app.mapHeight):
             app.flights.remove(aircraft) """
@@ -137,11 +137,10 @@ def drawBackground(app, canvas):
         canvas.create_oval(app.airport.pos[0] - dist, app.airport.pos[1] - dist,
                             app.airport.pos[0] + dist, app.airport.pos[1] + dist,
                             outline = app.color, dash = (1, 1))
-    #canvas.create_text()
     if app.selected != None:
         canvas.create_text(app.mapWidth - 20, app.mapHeight - 20, anchor = 'e', 
                         text = f"{app.selected.callsign} - {app.selected.flt_no()}", 
-                        font = "Arial 14 bold", fill = 'white')
+                        font = "Arial 14 bold", fill = app.color)
 
 def drawAirport(app, canvas):
     cx, cy = app.mapWidth / 2, app.mapHeight / 2
@@ -170,40 +169,40 @@ def drawWaypoints(app, canvas):
         p3 = (cx - 6 / 3 ** 0.5, cy + 2)
         canvas.create_polygon(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1], fill = app.color)
         canvas.create_text(cx - 5, cy - 5, text = waypoint.name, 
-                        font = "Arial 9", fill = app.color, anchor = 'e')
+                        font = "Arial 9", fill = "sky blue", anchor = 'e')
 
 # draws aircraft and information
-def drawAircraft(app, canvas, plane):
+def drawAircraft(app, canvas, plane, color):
     info = f"{plane.callsign}, {plane.hdg}°, {plane.spd}kt, {int(plane.alt)}ft, {plane.vs}ft/m"
     x, y = plane.pos
     r = 40
-    if not plane.safe: safetyColor = 'red'
-    else: safetyColor = 'light green'
     # aircraft
-    canvas.create_rectangle(x - 5, y - 5, x + 5, y + 5, outline = app.color)
+    canvas.create_rectangle(x - 5, y - 5, x + 5, y + 5, outline = color)
     # pointer
     canvas.create_line(x, y, x + hdgVector(plane.hdg, plane.spd / 6)[0],
-                y - hdgVector(plane.hdg, plane.spd / 6)[1], fill = app.color)
+                y - hdgVector(plane.hdg, plane.spd / 6)[1], fill = color)
     # trajectory
     if app.selected == plane:
         if app.selected.direct == None:
             canvas.create_line(x, y, x + hdgVector(app.selected.hdg, 5 * app.selected.spd)[0],
-                        y - hdgVector(app.selected.hdg, 5 * app.selected.spd)[1], fill = app.color,
+                        y - hdgVector(app.selected.hdg, 5 * app.selected.spd)[1], fill = color,
                         dash = (1, 1))
         elif type(app.selected) == Arrival and app.selected.ILS == True:
             canvas.create_line(app.selected.pos[0], app.selected.pos[1], app.selected.runway.pos[0], app.selected.runway.pos[1], 
-                                fill = app.color, dash = (1, 1))
+                                fill = color, dash = (1, 1))
         else:
             canvas.create_line(app.selected.pos[0], app.selected.pos[1], app.selected.direct.pos[0], app.selected.direct.pos[1], 
-                                fill = app.color, dash = (1, 1))
+                                fill = color, dash = (1, 1))
     # change anchor opposite to pointer
     if plane.hdg < 180: anchor, offset = "e", -10
     else: anchor, offset = "w", 10
     # aircraft information
     canvas.create_text(x + offset, y, text = info, 
                         anchor = anchor, font = "Arial 8 bold", fill = 'white')
+    if not plane.safe: color = 'red'
     # safety ring
-    canvas.create_oval(x - r, y - r, x + r, y + r, outline = safetyColor, dash = (1, 1))
+    # TODO sidebar aircraft stick turns red
+    canvas.create_oval(x - r, y - r, x + r, y + r, outline = color, dash = (1, 1))
     # basic drawing feature
     if app.selected == plane:
         for i in range(len(plane.path) - 1):
@@ -211,24 +210,37 @@ def drawAircraft(app, canvas, plane):
             x1, y1 = plane.path[i + 1]
             canvas.create_line(x0, y0, x1, y1, fill = 'light green')
 
+def drawDeparture(app, canvas, plane):
+    if not plane.sent:
+        drawAircraft(app, canvas, plane, "MediumPurple2")
+
+def drawArrival(app, canvas, plane):
+    if not plane.landed:
+        drawAircraft(app, canvas, plane, "coral")
+
 # draws sidebar with flight stick information
 def drawSidebar(app, canvas):
     detailHeight = 350
     controlHeight = 300
     margin = 5
     # white background
-    canvas.create_rectangle(app.mapWidth, 0, app.width, app.height,
-                            fill = app.color)
+    canvas.create_rectangle(app.mapWidth, 0, app.width, app.height, fill = app.color)
     # titles
-    canvas.create_text((app.mapWidth + app.width) / 2, 15, text = 'Flights',
-                        font = "Arial 14 bold")
+    canvas.create_text((app.mapWidth + app.width) / 2, 15, text = 'Flights', font = "Arial 14 bold")
     # timer
     canvas.create_rectangle(app.mapWidth + margin, app.height - (60 + margin),
                                     app.width - margin, app.height - margin,
                                     outline = 'black', width = 2, fill = app.color)
+    # game info
     canvas.create_text(app.mapWidth + margin + 10, app.height - margin - 30, 
                 text = f'Airport: {app.airport.code}, Class {app.airport.size} \nTimer: {int(app.timer // 60)}:{int((app.timer % 60))}', 
                 font = "Arial 15 bold", anchor = 'w')
+    # other elements
+    drawSidebarDetails(app, canvas, margin, detailHeight)
+    drawSidebarFlights(app, canvas, margin)
+    
+
+def drawSidebarDetails(app, canvas, margin, detailHeight):
     # TODO details pane
     if app.selected != None:
         x0, y0, x1, y1 = app.mapWidth + margin, 280 + 5 * margin, app.width - margin, 280 + detailHeight + 5 * margin
@@ -240,6 +252,8 @@ def drawSidebar(app, canvas):
             else: data = vars(app.selected)[key]
             canvas.create_text(app.mapWidth + 3 * margin, y0 + (row + 1) * margin + (row + 0.5) * 20, 
                             text = f"{key.capitalize()}: {data}",  font = 'Arial 12 bold', anchor = 'w')
+
+def drawSidebarFlights(app, canvas, margin):
     # draw flight sticks
     if len(app.flights) > 0:
         for row in range(len(app.display)):
@@ -285,10 +299,12 @@ def redrawAll(app, canvas):
     drawBackground(app, canvas)
     drawAirport(app, canvas)
     for flight in app.flights:
-        drawAircraft(app, canvas, flight)
+        if type(flight) == Departure:
+            drawDeparture(app, canvas, flight)
+        else: drawArrival(app, canvas, flight)
+    drawWaypoints(app, canvas)
     drawCommandInput(app, canvas)
     drawSidebar(app, canvas)
     drawWind(app, canvas)
-    drawWaypoints(app, canvas)
 
 runApp(width = 1920, height = 1080)

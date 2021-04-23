@@ -205,7 +205,10 @@ class Departure(Flight):
         self.fuel = fuel
         self.cleared = False
         self.departed = False
+        self.end = end.name
         self.runway = runway
+        self.sent = False
+        self.endWaypoint = end
 
     def move(self):
         if self.cleared:
@@ -219,6 +222,8 @@ class Departure(Flight):
             self.fuel -= self.fuelRate
         if self.direct != None:
             self.direct_waypoint(self.direct)
+        if distance(self.pos, self.endWaypoint.pos) < 30:
+            self.sent = True
 
     def clear_takeoff(self):
         self.cleared = True
@@ -241,6 +246,7 @@ class Arrival(Flight):
         super().__init__(callsign, type, pos, hdg, spd, alt, vs, start, end, fuel)
         self.fuel = fuel
         self.ILS = False
+        self.landed = False
     
     def check_ILS(self, runways):
         for runway in runways:
@@ -251,6 +257,7 @@ class Arrival(Flight):
                 self.intercept_ILS(runway)
             if self.ILS:
                 self.capture_gs(self.runway)
+                self.land(self.runway)
 
     def gs_change_spd(self, spd):
         if self.spd != spd:
@@ -267,6 +274,10 @@ class Arrival(Flight):
             time = (distance(self.pos, runway.pos) - 5) / (self.spd / 100)
             self.vs = - int(self.spd * 6)
             self.gs_change_spd(140)
+
+    def land(self, runway):
+        if self.alt < 100 and distance(self.pos, runway.pos) < 15:
+            self.landed = True
 
 # self.vs = int(-self.alt * 60 / 125)
 
@@ -350,3 +361,20 @@ class Runway(object):
         return p1, p2, p3
 
         #abs(self.hdg - airport.wind) < 30 or abs((self.hdg + 180) % 360 - airport.wind) < 30
+
+class Weather(object):
+
+    def __init__(self, airport):
+        self.storm = []
+        self.stormLevel = random.randrange(0,3)
+        self.winds = []
+        self.visibility = self.stormLevel
+
+    def createStorms(self, pos, level):
+        pass
+
+    def createWinds(self, airport):
+        pass
+
+    def landing_success(self, airport):
+        pass

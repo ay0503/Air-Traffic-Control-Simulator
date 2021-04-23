@@ -73,7 +73,21 @@ create arrival generator
  - added new airlines to game
  - fixed departure speed and altitude bugs
 
- 4/21/2021 - 
+ 4/21/2021 - 2.1 hours
  - added debug command mode to change flight attributes
  - simplified runway heading generation
  - wind generation fix
+
+ 4/23/2021 - 5.1 hours
+ - divided overall design structure for better management
+ - created typo ratio based typo correction in the command recognition
+ - added limit to addable flights
+ - added pro mode, easy mode division
+ - bug fixes to detail pane
+ - calculation updates to landing glideslope calculation
+ - changed route structure for departures
+ - changed visual bug where waypoint is shown over command prompt
+ - added land, sent states for aircraft that have completed objective
+ - aircraft now feature transponder codes with special cases (mayday, hijacking)
+ - added landing probabilities based on weather states (visibility, crosswinds)
+ - new colors for departing and arriving aircraft

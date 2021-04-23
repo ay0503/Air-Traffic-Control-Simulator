@@ -29,3 +29,7 @@ array = np.array(pixels, dtype=np.uint8)
 # Use PIL to create an image from the new array of pixels
 new_image = Image.fromarray(array)
 new_image.save('new.png')
+
+
+
+#print(findMatches("dark", ["dbnk"]))

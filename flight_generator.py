@@ -74,7 +74,7 @@ def newArrivalRoute(code, airport):
 
 def newDepartureRoute(airport):
     start = airport.code
-    end = random.choice(airport.waypoints).name
+    end = random.choice(airport.waypoints)
     return start, end
 
 # 25% fuel remaining average during approach

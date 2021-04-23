@@ -12,6 +12,36 @@ testFlights = [Flight('DAL123', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI
         Flight('KAL123', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI', 535),
         Flight('DAL3232', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI', 535),]
 
+
+# typo recgnition
+
+def letterCounts(word):
+    result = dict()
+    for letter in list(word):
+        result[letter] = result.get(letter, 0) + 1
+    return result
+
+def closeEnough(typo, word):
+    diff = 0
+    typoData, wordData = letterCounts(typo), letterCounts(word)
+    for key in wordData:
+        if key not in typoData.keys():
+            diff += 1
+        else:
+            diff += abs(typoData[key] - wordData[key])
+    for i in range(min(len(word), len(typo))):
+        if not ((typo[i:] in word[i:]) or (word[i:] in typo[i:])):
+            diff += 1
+    print(diff / (2 * len(word)))
+    return diff / (2 * len(word)) < 0.5
+
+def findMatches(typo, words):
+    for word in words:
+        if closeEnough(typo, word):
+            typo = words
+    return False
+
+# command recognition
 def findCallsign(cmd, aircrafts):
     word = cmd.split(' ')
     for aircraft in aircrafts:
@@ -32,7 +62,7 @@ def findAltitude(words):
         if word.isdigit():
             numbers.append(word)
     for number in numbers:
-        if int(number) % 500 == 0:
+        if int(number) % 50 == 0:
             return number
 
 def findAltCommand(cmd):
