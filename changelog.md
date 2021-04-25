@@ -91,3 +91,13 @@ create arrival generator
  - aircraft now feature transponder codes with special cases (mayday, hijacking)
  - added landing probabilities based on weather states (visibility, crosswinds)
  - new colors for departing and arriving aircraft
+ 
+4/24/2021 - 5.6 hours
+- moved draw functions to seperate file for simplicity
+- added number only callsign recognition
+- added basic typo correction to command recognition
+
+4/25/2021 - 
+- added basic control panel to sidebar
+- added waypoint selection feature
+- added 

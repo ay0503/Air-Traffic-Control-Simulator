@@ -18,7 +18,8 @@ def roundHalfUp(d):
 
 def checkSafety(aircrafts):
     #! BUG rechecks same aircraft and changes safety status
-    # TODO create more lose scenarios
+    unsafe = []
+    crash = []
     for fl1 in aircrafts:
         if fl1.fuel < 30:
             fl1.safe = False
@@ -28,11 +29,10 @@ def checkSafety(aircrafts):
                 altDiff = abs(fl1.alt - fl2.alt)
                 if d < 80 and altDiff < 500:
                     fl1.safe = fl2.safe = False
-                    break
                 elif d < 30 and altDiff < 60:
                     fl1.safe = fl2.safe = False
                     fl1.crash = fl2.crash = True
-                else: 
+                else:
                     fl1.safe = fl2.safe = True
 
 def vectorHdg(p1, p2):
@@ -61,7 +61,7 @@ def checkDirection(currHdg, hdg):
     else: return True
 
 def testCheckDirection():
-    print('Testing Heading Direction Algorithm')
+    print('Testing Heading Direction Algorithm...', end = "")
     assert(checkDirection(124, 90) == False)
     assert(checkDirection(160, 92) == False)
     assert(checkDirection(20, 340) == False)
@@ -78,7 +78,6 @@ testCheckDirection()
 
 # classes
 ###### TODO POSITIONS MUST END UP BEING RELATIVE TO WINDOW WITH LAT, LONG ######
-# TODO add autopilot state for direct, hdg line predictions
 class Flight(object):
     
     def __init__(self, callsign, type, pos, hdg, spd, alt, vs, start, end, fuel):
@@ -230,7 +229,7 @@ class Departure(Flight):
 
     # TODO replace with vspeed
     def takeoff(self):
-        if self.spd < 150:
+        if self.spd < 145:
             self.acc = 5
         else:
             self.vs = 3000
@@ -272,7 +271,7 @@ class Arrival(Flight):
     def capture_gs(self, runway):
         if self.alt < 4000 and distance(self.pos, runway.pos) < 200:
             time = (distance(self.pos, runway.pos) - 5) / (self.spd / 100)
-            self.vs = - int(self.spd * 6)
+            self.vs = - int(self.spd * 5)
             self.gs_change_spd(140)
 
     def land(self, runway):
@@ -349,9 +348,9 @@ class Runway(object):
         self.open = True
         self.num = roundHalfUp(hdg / 10)
         self.length = length
-        self.plength = self.length / 500
-        self.beacon = [self.pos[0] - hdgVector(self.hdg, 12 * self.plength)[0], 
-                        self.pos[1] + hdgVector(self.hdg, 12 * self.plength)[1]]
+        self.plength = self.length / 400
+        self.beacon = [self.pos[0] - hdgVector(self.hdg, 10 * self.plength)[0], 
+                        self.pos[1] + hdgVector(self.hdg, 10 * self.plength)[1]]
 
     def range_ILS(self):
         norm = normalVector(list(map(lambda x,y: x-y, self.beacon, self.pos)))
@@ -370,7 +369,9 @@ class Weather(object):
         self.winds = []
         self.visibility = self.stormLevel
 
-    def createStorms(self, pos, level):
+    def createStorms(self, pos, airport, level):
+        self.stormLevel = level 
+        self.winds = self.createWinds()
         pass
 
     def createWinds(self, airport):

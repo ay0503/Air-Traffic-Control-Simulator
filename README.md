@@ -22,3 +22,7 @@ Run the atc_simulator python file to start
 Libraries:
 
 Shortcuts:
+
++: Adds new arrival flight
+-: Removes the last flight on the list
+Up and Down: Scroll through flight list on the sidebar

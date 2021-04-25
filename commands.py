@@ -21,7 +21,7 @@ def letterCounts(word):
         result[letter] = result.get(letter, 0) + 1
     return result
 
-def closeEnough(typo, word):
+def closeEnough(typo, word, index):
     diff = 0
     typoData, wordData = letterCounts(typo), letterCounts(word)
     for key in wordData:
@@ -32,16 +32,16 @@ def closeEnough(typo, word):
     for i in range(min(len(word), len(typo))):
         if not ((typo[i:] in word[i:]) or (word[i:] in typo[i:])):
             diff += 1
-    print(diff / (2 * len(word)))
-    return diff / (2 * len(word)) < 0.5
+    return diff / (2 * len(word)) < index
 
-def findMatches(typo, words):
+def findMatches(typo, words, index):
     for word in words:
-        if closeEnough(typo, word):
-            typo = words
-    return False
+        if closeEnough(typo, word, index):
+            return word
+    return None
 
 # command recognition
+
 def findCallsign(cmd, aircrafts):
     word = cmd.split(' ')
     for aircraft in aircrafts:
@@ -54,6 +54,9 @@ def findCallsign(cmd, aircrafts):
             return aircraft.callsign
         # verbal case (spaces)
         if aircraft.flt_no() in cmd:
+            return aircraft.callsign
+        # number only case
+        if word[0] == no:
             return aircraft.callsign
             
 def findAltitude(words):
@@ -68,9 +71,9 @@ def findAltitude(words):
 def findAltCommand(cmd):
     words = cmd.split(" ")
     keywords = ["climb", "descend"]
-    for keyword in keywords:
-        if keyword in words:
-            altComm = words[words.index(keyword):]
+    for word in words:
+        if findMatches(word, keywords, 0.5) != None:
+            altComm = words[words.index(word):]
             return findAltitude(altComm)
     return None
 
@@ -86,9 +89,9 @@ def findHeading(words):
 def findHdgCommand(cmd):
     words = cmd.split(" ")
     keywords = ["heading", "turn", "right", "left"]
-    for keyword in keywords:
-        if keyword in words:
-            hdgComm = words[words.index(keyword):]
+    for word in words:
+        if findMatches(word, keywords, 0.5) != None:
+            hdgComm = words[words.index(word):]
             return findHeading(hdgComm)
     return None
 
@@ -99,7 +102,7 @@ def findSpeed(words):
             numbers.append(word)
     for number in numbers:
         # speed is under 250 kts below 10000 ft
-        if 130 <= int(number) < 250:
+        if 130 <= int(number) < 250 and int(number) % 5 == 0:
             return number
 
 def findWaypoint(words, airport):
@@ -116,18 +119,18 @@ def findWaypoint(words, airport):
 def findDirectCommand(cmd, airport):
     words = cmd.split(" ")
     keywords = ["direct", "waypoint"]
-    for keyword in keywords:
-        if keyword in words:
-            wptComm = words[words.index(keyword):]
+    for word in words:
+        if findMatches(word, keywords, 0.4) != None:
+            wptComm = words[words.index(word):]
             return findWaypoint(wptComm, airport)
     return None
 
 def findSpdCommand(cmd):
     words = cmd.split(" ")
     keywords = ["accelerate", "decelerate", "speed", "decel"]
-    for keyword in keywords:
-        if keyword in words:
-            spdComm = words[words.index(keyword):]
+    for word in words:
+        if findMatches(word, keywords, 0.4) != None:
+            spdComm = words[words.index(word):]
             return findSpeed(spdComm)
     return None
 
@@ -179,13 +182,14 @@ def executeCommand(flights, airport, cmd):
         if spd != None: flight.change_spd(int(spd))
 
 def testDivideCommand():
-    print("Testing Command Recognition")
+    print("Testing Command Recognition...", end = "")
     assert(divideCommand("DAL123 fly heading 230 climb to 3000", testFlights, testAirport) == ('DAL123', '3000', None, '230', None, False))
-    assert(divideCommand("DAL 123 descend to 2000", testFlights, testAirport) == ('DAL123', '2000', None, None, None, False))
+    """ assert(divideCommand("DAL 123 descend to 2000", testFlights, testAirport) == ('DAL123', '2000', None, None, None, False))
+    assert(divideCommand("123 descend to 2000", testFlights, testAirport) == ('DAL123', '2000', None, None, None, False))
     assert(divideCommand("Delta 3232 decelerate to 210", testFlights, testAirport) == ('DAL3232', None, None, None, '210', False))
     assert(divideCommand("DAL 123 direct to BELLY", testFlights, testAirport) == ('DAL123', None, testAirport.waypoints[0], None, None, False))
     assert(divideCommand("Korean Air 123 turn right heading 350", testFlights, testAirport) == ('KAL123', None, None, '350', None, False))
-    assert(divideCommand("DAL123 decelerate to 200", testFlights, testAirport) == ('DAL123', None, None, None, "200", False))
+    assert(divideCommand("DAL123 decelerate to 200", testFlights, testAirport) == ('DAL123', None, None, None, "200", False)) """
     print("Passed")
 
-#testDivideCommand()
+testDivideCommand()
