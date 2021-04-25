@@ -100,4 +100,4 @@ create arrival generator
 4/25/2021 - 
 - added basic control panel to sidebar
 - added waypoint selection feature
-- added 
+- added scoring system

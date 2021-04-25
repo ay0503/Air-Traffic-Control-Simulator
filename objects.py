@@ -370,9 +370,8 @@ class Weather(object):
         self.visibility = self.stormLevel
 
     def createStorms(self, pos, airport, level):
-        self.stormLevel = level 
+        self.stormLevel = level
         self.winds = self.createWinds()
-        pass
 
     def createWinds(self, airport):
         pass

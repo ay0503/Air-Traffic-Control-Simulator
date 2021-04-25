@@ -168,6 +168,9 @@ def debugExecuteCommand(flights, airport, cmd):
         if spd != None: flight.spd = int(spd)
 
 def executeCommand(flights, airport, cmd):
+    if cmd == "crash":
+        random.choice(flights).crash = True
+        return
     (callsign, alt, wpt, hdg, spd, clr) = divideCommand(cmd, flights, airport)
     flight = None
     for fl in flights:
@@ -181,6 +184,16 @@ def executeCommand(flights, airport, cmd):
         if hdg != None: flight.change_hdg(int(hdg))
         if spd != None: flight.change_spd(int(spd))
 
+def testFindMatches():
+    print("Testing Typo Recognition...", end = "")
+    assert(findMatches("accalerte", ["accelerate", "decelerate"], 0.5) == "accelerate")
+    assert(findMatches("accalerte", ["decelerate", "accelerate"], 0.5) == "accelerate")
+    assert(findMatches("decsend", ["climb", "descend"], 0.4) == "descend")
+    assert(findMatches("headng", ["accelerate", "heading"], 0.4) == "heading")
+    assert(findMatches("drct", ["heading", "direct"], 0.5) == "direct")
+    assert(findMatches("acclrate", ["heading", "direct"], 0.5) == None)
+    print("Passed")
+
 def testDivideCommand():
     print("Testing Command Recognition...", end = "")
     assert(divideCommand("DAL123 fly heading 230 climb to 3000", testFlights, testAirport) == ('DAL123', '3000', None, '230', None, False))
@@ -192,4 +205,5 @@ def testDivideCommand():
     assert(divideCommand("DAL123 decelerate to 200", testFlights, testAirport) == ('DAL123', None, None, None, "200", False)) """
     print("Passed")
 
+testFindMatches()
 testDivideCommand()

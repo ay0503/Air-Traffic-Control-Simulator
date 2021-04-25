@@ -37,6 +37,8 @@ def appStarted(app):
     app.type = False
     app.draw = []
     app.pro = False
+    app.score = 0
+    app.finished = set()
     
     # airports
     #* GAMEMODES: Real World Data, Random Generated Data, Maybe? Custom building
@@ -61,10 +63,8 @@ def appStarted(app):
     app.timer = 0
     
     # aircrafts
-    app.flights = []
-    for count in range(2):
-        app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
-    app.flights.append(createDeparture(app.airport))
+    app.flights = [createArrival(app.mapWidth, app.mapHeight, app.airport),
+                    createDeparture(app.airport)]
     app.sticks = 5
     app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
 
@@ -106,7 +106,10 @@ def mousePressed(app, event):
         for waypoint in app.airport.waypoints:
             if distance(waypoint.pos, (event.x, event.y)) < 20:
                 app.selected_waypoint = waypoint
-        #app.selected = None
+    if app.crash:
+        if (app.mapWidth / 2 - 110 < event.x < app.mapWidth / 2 + 110 
+            and app.mapHeight / 2 + 120 < event.y < app.mapHeight / 2 + 180):
+            appStarted(app)
 
 # changes map size
 def sizeChanged(app):
@@ -131,6 +134,13 @@ def timerFired(app):
         flight.move()
         if type(flight) == Arrival:
             flight.check_ILS(app.airport.runways)
+            if flight.landed and flight not in app.finished:
+                app.score += 10
+                app.finished.add(flight)
+        elif type(flight) == Departure:
+            if flight.sent and flight not in app.finished:
+                app.score += 5
+                app.finished.add(flight)
     checkSafety(app.flights)
     # create arrivals every 30 seconds
     if app.timer % 10 == 0 and app.timer > 0 and len(app.flights) < 10:
@@ -139,8 +149,6 @@ def timerFired(app):
             app.flights.remove(aircraft) """
 
 def redrawAll(app, canvas):
-    if app.crash:
-        drawGameOver(app, canvas)
     drawBackground(app, canvas)
     drawAirport(app, canvas)
     for flight in app.flights:
@@ -151,5 +159,8 @@ def redrawAll(app, canvas):
     drawCommandInput(app, canvas)
     drawSidebar(app, canvas)
     drawWind(app, canvas)
+    if app.crash:
+        # TODO finish game over state
+        drawGameOver(app, canvas)
 
 runApp(width = 1920, height = 1080)

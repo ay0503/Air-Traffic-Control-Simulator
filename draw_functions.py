@@ -101,7 +101,7 @@ def drawSidebar(app, canvas):
                                     outline = 'black', width = 2, fill = app.color)
     # game info
     canvas.create_text(app.mapWidth + app.margin + 10, app.height - app.margin - 30, 
-                text = f'Airport: {app.airport.code}, Class {app.airport.size} \nTimer: {int(app.timer // 60)}:{int((app.timer % 60))}', 
+                text = f'Airport: {app.airport.code}, Class {app.airport.size} \nTimer: {int(app.timer // 60)}:{int((app.timer % 60))}      Score: {int(app.score)}', 
                 font = "Arial 15 bold", anchor = 'w')
     # other elements
     drawSidebarFlights(app, canvas)
@@ -192,4 +192,15 @@ def drawWind(app, canvas):
                         text = f'{int(app.airport.wind[0])} at {app.airport.wind[1]} kts')
 
 def drawGameOver(app, canvas):
+    width, height = 110, 30
+    canvas.create_rectangle(0, 0, app.mapWidth, app.mapHeight, fill = 'black')
+    canvas.create_text(app.mapWidth / 2, app.mapHeight / 2, text = "GAME OVER", 
+                        font = "Arial 45 bold", fill = app.color)
+    canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 + 50, text = f"Score: {app.score}", 
+                        font = "Arial 30 bold", fill = app.color) 
+    canvas.create_rectangle(app.mapWidth / 2 - width, app.mapHeight / 2 - height + 150,
+                        app.mapWidth / 2 + width, app.mapHeight / 2 + height + 150,
+                        fill = app.color, outline = "light green", width = 4)
+    canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 + 150, text = "Play Again",
+                        font = "Arial 30 bold", fill = 'black')                  
     pass
