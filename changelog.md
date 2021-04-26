@@ -102,9 +102,10 @@ create arrival generator
 - added waypoint selection feature
 - added scoring system
 
-4/26/2021 - 4.1 hours
+4/26/2021 - 7.0 hours
 - created wind map based on a air pressure map generated through noise
 - fixed zero fuel rate bug
 - fixed Score on game over screen
 - added crash, fuel limit debug commands
 - ILS now captures along localizer line
+- flights now follow localizer after lining up with runway

@@ -88,7 +88,7 @@ def drawDeparture(app, canvas, plane):
 
 def drawArrival(app, canvas, plane):
     if not plane.landed:
-        drawAircraft(app, canvas, plane, "coral")
+        drawAircraft(app, canvas, plane, "light green")
 
 # draws sidebar with flight stick information
 def drawSidebar(app, canvas):

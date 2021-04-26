@@ -16,13 +16,13 @@ def roundHalfUp(d):
     # https://docs.python.org/3/library/decimal.html#rounding-modes
     return int(decimal.Decimal(d).to_integral_value(rounding=rounding))
 
-def checkLineDistance(beaconpos, runwaypos, pos):
+def checkLineDistance(beaconpos, runwaypos, pos, d = 20):
     start = copy.deepcopy(beaconpos)
     end = copy.deepcopy(runwaypos)
     vector = list(map(lambda x,y: y-x, start, end))
     interval = list(map(lambda x: x / distance(start, end), vector))
     while distance(start, end) > 2 ** 1.5:
-        if distance(pos, start) < 20:
+        if distance(pos, start) < d:
             return True
         start = list(map(lambda x,y: x+y, start, interval))
     return False
@@ -88,7 +88,6 @@ def testCheckDirection():
 testCheckDirection()
 
 # classes
-###### TODO POSITIONS MUST END UP BEING RELATIVE TO WINDOW WITH LAT, LONG ######
 class Flight(object):
     
     def __init__(self, callsign, type, pos, hdg, spd, alt, vs, start, end, fuel):
@@ -150,7 +149,8 @@ class Flight(object):
         self.spd += self.acc
         self.fuel -= self.fuelRate
         if self.direct != None:
-            self.direct_waypoint(self.direct)
+            if type(self) == Arrival and not self.ILS:
+                self.direct_waypoint(self.direct)
 
     def change_hdg(self, hdg):
         if (self.hdg % 360) != hdg:
@@ -256,16 +256,21 @@ class Arrival(Flight):
         super().__init__(callsign, type, pos, hdg, spd, alt, vs, start, end, fuel)
         self.fuel = fuel
         self.ILS = False
+        self.ga = random.choice([True] * 1 + [False] * 6)
         self.landed = False
     
     def check_ILS(self, runways):
         for runway in runways:
             #print(distance(self.pos, runway.beacon), self.hdg, runway.hdg)
-            if (checkLineDistance(runway.beacon, runway.pos, self.pos) 
-                and abs(self.hdg - runway.hdg) < 30):
+            if checkLineDistance(runway.beacon, runway.pos, self.pos) and abs(self.hdg - runway.hdg) < 40:
                 self.ILS = True
                 self.runway = runway
                 self.intercept_ILS(runway)
+                if 0 < self.hdg - runway.hdg < 10:
+                    self.hdg += 3
+                elif -10 < self.hdg - runway.hdg < 0:
+                    self.hdg -= 3
+                self.direct = runway
             if self.ILS:
                 self.capture_gs(self.runway)
                 self.land(self.runway)
@@ -276,9 +281,9 @@ class Arrival(Flight):
             self.acc = sign * 2
             self.spdCon = spd
 
-    # TODO follow localizer
     def intercept_ILS(self, runway):
-        self.direct_waypoint(runway)
+        if checkLineDistance(runway.beacon, runway.pos, self.pos, 8):
+            self.direct_waypoint(runway)
 
     def capture_gs(self, runway):
         if self.alt < 4000 and distance(self.pos, runway.pos) < 200:
@@ -288,9 +293,17 @@ class Arrival(Flight):
 
     def land(self, runway):
         if self.alt < 100 and distance(self.pos, runway.pos) < 15:
-            self.landed = True
-
-# self.vs = int(-self.alt * 60 / 125)
+            if not self.ga:
+                self.landed = True
+            else: 
+                self.go_around()
+    
+    def go_around(self):
+        self.change_alt(3500)
+        self.hdg = (self.runway.hdg + 180) % 360
+        self.change_spd(210)
+        self.ILS = False
+        # TODO maybe create go around guidance
 
 class Aircraft(object):
     
@@ -356,10 +369,12 @@ class Runway(object):
         self.pos = list(map(lambda x, y : x + y, pos, airport.pos))
         self.hdg = hdg
         self.rwy = rwy
-        # TODO WIP average is extreme
+        self.open = True
         if airport.size not in ["A", "B"]:
-            self.open = self.check_winds(airport.winds)
+            if list(map(lambda x: x.open, airport.runways)).count(True) > 0:
+                self.open = self.check_winds(airport.winds)
         else: self.open = True
+        #print(list(map(lambda x: x.open, filter(lambda x: x.open == True, airport.runways))))
         self.num = roundHalfUp(hdg / 10)
         self.length = length
         self.plength = self.length / 400

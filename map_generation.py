@@ -1,4 +1,3 @@
-import random, math
 from objects import *
 from cmu_112_graphics import *
 import numpy as np

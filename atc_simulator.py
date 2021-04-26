@@ -7,9 +7,6 @@ from draw_functions import *
 from weather import winds
 import time, string, random
 
-# TODO create timer
-# TODO create fuel restriction
-# TODO flight time, limits, fuel
 #* AI FOR WEATHER AVOIDANCE
 #* WEATHER EVENTS THAT AFFECT AIRPORT AND AIRCRAFT
 #* WINDS, STORMS
@@ -43,8 +40,7 @@ def appStarted(app):
     app.pressure = noiseMap
     app.image1 = Image.new(mode='RGB', size=(app.mapWidth, app.mapHeight))
     # airports
-    #* GAMEMODES: Real World Data, Random Generated Data, Maybe? Custom building
-    # TODO runway generator from data
+    #* FUTURE GAMEMODES: Real World Data, Random Generated Data, Maybe? Custom building
     # pre generation
     """ app.airport = Airport("KLAX", [app.mapWidth / 2, app.mapHeight / 2], [], 'F')
     app.airport.runways += [Runway('25L', [0, -6], 251, 12000, app.airport), 

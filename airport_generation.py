@@ -6,8 +6,6 @@ from pprint import pprint
 from weather import winds
 import string, random
 
-# TODO generate runways rwy ### depends on heading, pos = ### may depend on heading, 
-
 # continent codes https://en.wikipedia.org/wiki/ICAO_airport_code#/media/File:ICAO_FirstLetter.svg
 continentCodes = ["K", "C", "S", "U", "Z", "R", "Y", "V", "B", "O", "E", "L"]
 letters = list(string.ascii_uppercase)
@@ -49,11 +47,14 @@ def newRwyPos( hdg, length):
     pos = list(map(lambda x,y: x+y, [0,0], normRwy))
     return pos
 
-# TODO generate parallel runway possibilities
 def generateRunway(airport):
     hdg = random.randrange(0, 360)
     length = 11000
     pos = newRwyPos(hdg, length)
+    for runway in airport.runways:
+        while distance(pos, runway.pos) < 4 and abs(hdg - runway.hdg) < 10:
+            hdg = random.randrange(0, 360)
+            pos = newRwyPos(hdg, length)
     rwy = roundHalfUp(hdg / 10)
     return Runway(rwy, pos, hdg, length, airport)
 
