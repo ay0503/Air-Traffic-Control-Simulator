@@ -3,10 +3,10 @@ from airport_data import airports
 from aircraft_data import  aircrafts
 from airline_data import airlines
 from pprint import pprint
+from weather import winds
 import string, random
 
 # TODO generate runways rwy ### depends on heading, pos = ### may depend on heading, 
-# TODO MAYBE link continents to continents of airlines
 
 # continent codes https://en.wikipedia.org/wiki/ICAO_airport_code#/media/File:ICAO_FirstLetter.svg
 continentCodes = ["K", "C", "S", "U", "Z", "R", "Y", "V", "B", "O", "E", "L"]
@@ -16,7 +16,7 @@ sizes = ["A", "B", "C", "D", "E", "F"]
 
 #* size guideline  
 #* farm, airstrip - A, regional - B, metropolitan - C, semi-international - D
-#* average international  - E, major international - F
+#* average international - E, major international - F
 
 # airport parameters
 def generateCode():
@@ -68,7 +68,7 @@ def generateAirport(pos):
     code = generateCode()
     size = generateSize(sizes)
     runways = []
-    airport = Airport(code, pos, runways, size, 0)
+    airport = Airport(code, pos, runways, size, winds)
     for count in range(runwayCount(airport.size)):
         airport.runways.append(generateRunway(airport))
         #pprint(f"Runway: {vars(airport.runways[count])}")

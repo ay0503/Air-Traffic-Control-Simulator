@@ -16,12 +16,23 @@ def roundHalfUp(d):
     # https://docs.python.org/3/library/decimal.html#rounding-modes
     return int(decimal.Decimal(d).to_integral_value(rounding=rounding))
 
+def checkLineDistance(beaconpos, runwaypos, pos):
+    start = copy.deepcopy(beaconpos)
+    end = copy.deepcopy(runwaypos)
+    vector = list(map(lambda x,y: y-x, start, end))
+    interval = list(map(lambda x: x / distance(start, end), vector))
+    while distance(start, end) > 2 ** 1.5:
+        if distance(pos, start) < 20:
+            return True
+        start = list(map(lambda x,y: x+y, start, interval))
+    return False
+
 def checkSafety(aircrafts):
     #! BUG rechecks same aircraft and changes safety status
-    unsafe = []
-    crash = []
     for fl1 in aircrafts:
-        if fl1.fuel < 30:
+        if fl1.fuel / fl1.fuelRate < 5:
+            fl1.crash = True
+        elif fl1.fuel / fl1.fuelRate < 30:
             fl1.safe = False
         for fl2 in aircrafts:
             if fl1.pos != fl2.pos:
@@ -88,7 +99,7 @@ class Flight(object):
         self.spd = spd
         self.alt = alt
         self.vs = vs
-        self.fuelRate = int(fuel / 300)
+        self.fuelRate = int(fuel / 300) + 1
         self.start = start
         self.end = end
         self.direct = None
@@ -250,7 +261,8 @@ class Arrival(Flight):
     def check_ILS(self, runways):
         for runway in runways:
             #print(distance(self.pos, runway.beacon), self.hdg, runway.hdg)
-            if distance(self.pos, runway.beacon) < 50 and abs(self.hdg - runway.hdg) < 30:
+            if (checkLineDistance(runway.beacon, runway.pos, self.pos) 
+                and abs(self.hdg - runway.hdg) < 30):
                 self.ILS = True
                 self.runway = runway
                 self.intercept_ILS(runway)
@@ -306,13 +318,13 @@ class Airline(object):
 # TODO create weather based states
 class Airport(object):
 
-    def __init__(self, code, pos, runways, size, wind):
+    def __init__(self, code, pos, runways, size, winds):
         self.pos = pos
         self.code = code
+        self.weather = Weather(self, winds)
         self.runways = runways
         self.size =  self.traffic = size
         self.waypoints = []
-        self.wind = wind
 
     def name(self):
         return airports[self.code]
@@ -345,12 +357,20 @@ class Runway(object):
         self.hdg = hdg
         self.rwy = rwy
         # TODO WIP average is extreme
-        self.open = True
+        if airport.size not in ["A", "B"]:
+            self.open = self.check_winds(airport.winds)
+        else: self.open = True
         self.num = roundHalfUp(hdg / 10)
         self.length = length
         self.plength = self.length / 400
         self.beacon = [self.pos[0] - hdgVector(self.hdg, 10 * self.plength)[0], 
                         self.pos[1] + hdgVector(self.hdg, 10 * self.plength)[1]]
+
+    def check_winds(self, winds):
+        x, y = int(self.pos[0] // 20), int(self.pos[1] // 20)
+        if ((abs(winds[y][x][0] - self.hdg) < 80 or abs(winds[y][x][0] - self.hdg + 180) % 360 < 80) and winds[y][x][1] < 10):
+            return True
+        return False
 
     def range_ILS(self):
         norm = normalVector(list(map(lambda x,y: x-y, self.beacon, self.pos)))
@@ -363,10 +383,10 @@ class Runway(object):
 
 class Weather(object):
 
-    def __init__(self, airport):
+    def __init__(self, airport, winds):
         self.storm = []
         self.stormLevel = random.randrange(0,3)
-        self.winds = []
+        self.winds = airport.winds = winds
         self.visibility = self.stormLevel
 
     def createStorms(self, pos, airport, level):

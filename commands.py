@@ -5,7 +5,7 @@ from airport_data import airports
 from airport_generation import *
 from flight_generator import *
 
-testAirport = generateAirport([500, 500])
+testAirport = generateAirport([800, 500])
 testAirport.waypoints.append(Waypoint("BELLY", [0,0]))
 
 testFlights = [Flight('DAL123', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI', 535),
@@ -157,20 +157,24 @@ def divideCommand(cmd, flights, airport):
     return (callsign, alt, wpt, hdg, spd, clr)
 
 def debugExecuteCommand(flights, airport, cmd):
+    if cmd == "crash":
+        random.choice(flights).crash = True
+        return
+    fuel = None
+    if "fuel" in cmd:
+        fuel = 3000
     (callsign, alt, wpt, hdg, spd, clr) = divideCommand(cmd, flights, airport)
     flight = None
     for fl in flights:
         if fl.callsign == callsign:
             flight = fl
     if flight != None:
+        if fuel != None: flight.fuel = fuel
         if alt != None: flight.alt = int(alt)
         if hdg != None: flight.hdg = int(hdg)
         if spd != None: flight.spd = int(spd)
 
 def executeCommand(flights, airport, cmd):
-    if cmd == "crash":
-        random.choice(flights).crash = True
-        return
     (callsign, alt, wpt, hdg, spd, clr) = divideCommand(cmd, flights, airport)
     flight = None
     for fl in flights:

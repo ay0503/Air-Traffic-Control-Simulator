@@ -4,6 +4,7 @@ from flight_generator import *
 from airport_generation import *
 from commands import *
 from draw_functions import *
+from weather import winds
 import time, string, random
 
 # TODO create timer
@@ -22,7 +23,7 @@ def appStarted(app):
     # graphics
     app.color = "white"
     app.sidebarWidth = 260
-    app.mapWidth, app.mapHeight = app.width - app.sidebarWidth, app.height - 50
+    app.mapWidth, app.mapHeight = app.width - app.sidebarWidth, app.height - 60
     app.input = []
     app.command = ""
     app.detailHeight = 240
@@ -39,7 +40,8 @@ def appStarted(app):
     app.pro = False
     app.score = 0
     app.finished = set()
-    
+    app.pressure = noiseMap
+    app.image1 = Image.new(mode='RGB', size=(app.mapWidth, app.mapHeight))
     # airports
     #* GAMEMODES: Real World Data, Random Generated Data, Maybe? Custom building
     # TODO runway generator from data
@@ -55,6 +57,7 @@ def appStarted(app):
     app.airport = generateAirport([app.mapWidth / 2, app.mapHeight / 2])
     app.airport.create_waypoints(app.mapWidth, app.mapHeight)
     print("Size:", app.airport.size)
+    app.weather = Weather(app.airport, winds)
     #pprint(f"Airport: {vars(app.airport)}")
 
     # inital parameters
@@ -96,6 +99,7 @@ def keyPressed(app, event):
         app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
 
 def mousePressed(app, event):
+    # command input click
     if 0 < event.x < app.mapWidth and app.mapHeight < event.y < app.height:
         app.type = True
     # detect mouse click on plane for selection
@@ -103,12 +107,17 @@ def mousePressed(app, event):
         for aircraft in app.flights:
             if distance(aircraft.pos, (event.x, event.y)) < 20:
                 app.selected = aircraft
+                break
+            else: 
+                app.selected = None
         for waypoint in app.airport.waypoints:
             if distance(waypoint.pos, (event.x, event.y)) < 20:
                 app.selected_waypoint = waypoint
+    # play again button detection
     if app.crash:
         if (app.mapWidth / 2 - 110 < event.x < app.mapWidth / 2 + 110 
             and app.mapHeight / 2 + 120 < event.y < app.mapHeight / 2 + 180):
+            app.clickColor = 'green'
             appStarted(app)
 
 # changes map size
@@ -149,6 +158,7 @@ def timerFired(app):
             app.flights.remove(aircraft) """
 
 def redrawAll(app, canvas):
+    #drawStorm(app, canvas, app.pressure)
     drawBackground(app, canvas)
     drawAirport(app, canvas)
     for flight in app.flights:
@@ -160,7 +170,6 @@ def redrawAll(app, canvas):
     drawSidebar(app, canvas)
     drawWind(app, canvas)
     if app.crash:
-        # TODO finish game over state
         drawGameOver(app, canvas)
 
 runApp(width = 1920, height = 1080)

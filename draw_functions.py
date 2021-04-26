@@ -1,5 +1,6 @@
 from cmu_112_graphics import *
 from objects import *
+from weather import noiseMap
 
 def drawBackground(app, canvas):
     canvas.create_rectangle(0, 0, app.mapWidth, app.mapHeight, fill = 'black')
@@ -178,29 +179,41 @@ def drawCommandInput(app, canvas):
 # wind circle direction indicator
 def drawWind(app, canvas):
     r = 40
-    hdg = app.airport.wind[0]
-    spd = app.airport.wind[1]
+    x, y = int(app.airport.pos[0] // 20), int(app.airport.pos[1] // 20)
+    hdg = app.airport.weather.winds[y][x][0]
+    spd = app.airport.weather.winds[y][x][1]
     canvas.create_oval(app.mapWidth - 30, 30, app.mapWidth - 30 - r, 30 + r, 
                         outline = app.color, width = 2)
     canvas.create_line(app.mapWidth - 30 - r / 2, 
                         30 + r / 2, 
-                        app.mapWidth - 30 - r / 2 + hdgVector(hdg, 1.5 * spd)[0], 
-                        30 + r / 2 - hdgVector(hdg, 1.5 * spd)[1], 
+                        app.mapWidth - 30 - r / 2 + hdgVector(hdg, 15)[0], 
+                        30 + r / 2 - hdgVector(hdg, 15)[1], 
                         fill = app.color, width = 2)
     canvas.create_text(app.mapWidth - 40 - r, 30 + r / 2, anchor = 'e',
                         font = 'Arial 8', fill = app.color,
-                        text = f'{int(app.airport.wind[0])} at {app.airport.wind[1]} kts')
+                        text = f'{int(hdg)} at {int(spd)} kts')
 
 def drawGameOver(app, canvas):
     width, height = 110, 30
     canvas.create_rectangle(0, 0, app.mapWidth, app.mapHeight, fill = 'black')
-    canvas.create_text(app.mapWidth / 2, app.mapHeight / 2, text = "GAME OVER", 
-                        font = "Arial 45 bold", fill = app.color)
-    canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 + 50, text = f"Score: {app.score}", 
-                        font = "Arial 30 bold", fill = app.color) 
     canvas.create_rectangle(app.mapWidth / 2 - width, app.mapHeight / 2 - height + 150,
                         app.mapWidth / 2 + width, app.mapHeight / 2 + height + 150,
                         fill = app.color, outline = "light green", width = 4)
+    # text
     canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 + 150, text = "Play Again",
-                        font = "Arial 30 bold", fill = 'black')                  
+                        font = "Arial 30 bold", fill = 'black')    
+    canvas.create_text(app.mapWidth / 2, app.mapHeight / 2, text = "GAME OVER", 
+                        font = "Arial 45 bold", fill = app.color)
+    canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 + 70, text = f"Score: {app.score}", 
+                        font = "Arial 30 bold", fill = app.color)               
     pass
+
+def drawStorm(app, canvas, pmap):
+    image = app.image1
+    print(len(pmap), len(pmap[0]))
+    for x in range(app.image1.width):
+        for y in range(app.image1.height):
+            val = int(pmap[y // 20][x // 20] * 255)
+            image.putpixel((x,y),(val,val,val))
+    canvas.create_image(app.mapWidth / 2, app.mapHeight / 2, image=ImageTk.PhotoImage(image))
+    

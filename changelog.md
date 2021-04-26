@@ -97,7 +97,14 @@ create arrival generator
 - added number only callsign recognition
 - added basic typo correction to command recognition
 
-4/25/2021 - 
+4/25/2021 - 5.2 hours
 - added basic control panel to sidebar
 - added waypoint selection feature
 - added scoring system
+
+4/26/2021 - 4.1 hours
+- created wind map based on a air pressure map generated through noise
+- fixed zero fuel rate bug
+- fixed Score on game over screen
+- added crash, fuel limit debug commands
+- ILS now captures along localizer line
