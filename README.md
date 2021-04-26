@@ -1,15 +1,14 @@
 # Air-Traffic-Control-Simulator
 # tp-atc
 
-This project simulates the work of air traffic control
+This project is an “Air Traffic Control Simulator” that simulates the real-world air traffic control radar from towers use to manage flights near airports. As a simulator, it mimics the verbal commands controllers use to direct aircraft while having the game aspect of having objectives of directing arrivals and departures. 
 
 Features:
-- 2D coastline, land generation
-- verbal and non-verbal text based command recognition, handling, and execution for flights
-- smart flight (arrival and departures), airport, and runway generation for fresh gameplay
-- real word mode which pulls real-world aviation data to create the environment
+- intelligent airport, runway, flight generation for fresh gameplay
+- autopilot features including ILS, glideslope, direct, headings
+- verbal and non-verbal text based command recognition, handling, and execution for flights with  typo recognition
+- weather engine with a wind map as well as storm features
 - weather based airport, aircraft scenarios such as windshear, go-arounds, and closures
-- aircraft auto-adjustment of course when capturing autoland
 - aircraft identification features which special scenarios such as hijacking, maydays, pan-pan-pans
 
 Background Knowledge:
