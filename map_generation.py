@@ -11,17 +11,6 @@ def noise():
         for x in range(len(L[0])):
             L[y][x] = '%.3f' % L[y][x]
     return L
-
-# https://www.cs.cmu.edu/~112/notes/notes-2d-lists.html#printing
-def maxItemLength(a):
-    maxLen = 0
-    rows = len(a)
-    cols = len(a[0])
-    for row in range(rows):
-        for col in range(cols):
-            maxLen = max(maxLen, len(str(a[row][col])))
-    return maxLen
-
 # https://www.cs.cmu.edu/~112/notes/notes-2d-lists.html#printing
 def print2dList(a):
     if (a == []):
@@ -29,7 +18,7 @@ def print2dList(a):
         print([])
         return
     rows, cols = len(a), len(a[0])
-    fieldWidth = maxItemLength(a)
+    fieldWidth = len(a[0])
     print('[')
     for row in range(rows):
         print(' [ ', end='')
@@ -49,6 +38,7 @@ def wind(L):
     removeZeros(result)
     return result
 
+# calculate wind from average air pressure differences
 def createWind(L, x, y):
     result = []
     for dx in [-1, 0, +1]:
@@ -70,6 +60,7 @@ def createWind(L, x, y):
     spd = distance([0,0], start) / 7
     return [hdg, spd]
 
+# removes zeros from first and last rows and cols
 def removeZeros(L):
     for row in L:
         row.remove(0)
@@ -87,16 +78,15 @@ def appStarted(app):
     app.winds = winds
 
 def getCellBounds(app, row, col):
-    # aka 'modelToView'
-    # returns (x0, y0, x1, y1) corners/bounding box of given cell in grid
-    gridWidth  = app.width - 2*app.margin
-    gridHeight = app.height - 2*app.margin
+    gridWidth  = app.width - 2 * app.margin
+    gridHeight = app.height - 2 * app.margin
     x0 = app.margin + gridWidth * col / app.cols
-    x1 = app.margin + gridWidth * (col+1) / app.cols
+    x1 = app.margin + gridWidth * (col + 1) / app.cols
     y0 = app.margin + gridHeight * row / app.rows
-    y1 = app.margin + gridHeight * (row+1) / app.rows
+    y1 = app.margin + gridHeight * (row + 1) / app.rows
     return (x0, y0, x1, y1)
 
+# draw wind board
 def drawBoard(app, canvas):
     for row in range(len(app.winds)):
         for col in range(len(app.winds[0])):

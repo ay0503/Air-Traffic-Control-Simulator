@@ -6,9 +6,11 @@ time = time.time()
 
 # helper functions
 
+# returns pixel distance between two points
 def distance(a, b):
     return ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5
 
+# https://www.cs.cmu.edu/~112/notes/notes-variables-and-functions.html#RecommendedFunctions
 def roundHalfUp(d):
     # Round to nearest with ties going away from zero.
     rounding = decimal.ROUND_HALF_UP
@@ -16,6 +18,7 @@ def roundHalfUp(d):
     # https://docs.python.org/3/library/decimal.html#rounding-modes
     return int(decimal.Decimal(d).to_integral_value(rounding=rounding))
 
+# checks if aircraft is close to a line vector used in localizer guidance
 def checkLineDistance(beaconpos, runwaypos, pos, d = 20):
     start = copy.deepcopy(beaconpos)
     end = copy.deepcopy(runwaypos)
@@ -27,6 +30,7 @@ def checkLineDistance(beaconpos, runwaypos, pos, d = 20):
         start = list(map(lambda x,y: x+y, start, interval))
     return False
 
+# changes safety status of aircraft based on proximity and fuel limits
 def checkSafety(aircrafts):
     #! BUG rechecks same aircraft and changes safety status
     for fl1 in aircrafts:
@@ -46,6 +50,7 @@ def checkSafety(aircrafts):
                 else:
                     fl1.safe = fl2.safe = True
 
+# returns a heading from a 2d cartesian vector
 def vectorHdg(p1, p2):
     d = (p2[0] - p1[0], p2[1] - p1[1])
     if d[0] == 0:
@@ -57,20 +62,24 @@ def vectorHdg(p1, p2):
     hdg = 360 - ((angle + 270) % 360)
     return int(hdg)
 
+# returns a 2d cartesian vector from a magnetic heading value
 def hdgVector(hdg, spd):
     angle = math.radians((360 - (hdg + 270) % 360) % 360)
     return [spd * math.cos(angle), spd * math.sin(angle)]
 
+# returns a normal vector of the given vector
 def normalVector(vector):
     vector[0], vector[1] = -vector[1], vector[0]
     return vector
 
+# checks the most efficient direction to turn (left or right) to get to heading
 def checkDirection(currHdg, hdg):
     if hdg == 0: hdg = 360
     if hdg - currHdg >= 180 or -180 <= hdg - currHdg <= 0:
         return False
     else: return True
 
+# test to check direction of turn when given select headings
 def testCheckDirection():
     print('Testing Heading Direction Algorithm...', end = "")
     assert(checkDirection(124, 90) == False)
@@ -85,9 +94,7 @@ def testCheckDirection():
     assert(checkDirection(188, 291) == True)
     print("Passed")
     
-testCheckDirection()
-
-# classes
+# game classes
 class Flight(object):
     
     def __init__(self, callsign, type, pos, hdg, spd, alt, vs, start, end, fuel):
@@ -114,6 +121,7 @@ class Flight(object):
         self.details = ['callsign', 'type', 'hdg', 'spd', 
                         'alt', 'vs', 'fuel', 'start', 'end']
 
+    # returns ICAO airline code
     def airline_code(self):
         code = ''
         for letter in self.callsign:
@@ -121,6 +129,7 @@ class Flight(object):
                 code += letter
         return code
 
+    # returns airline name
     def airline_name(self):
         code = ''
         for letter in self.callsign:
@@ -128,9 +137,11 @@ class Flight(object):
                 code += letter
         return airlines[code]
 
+    # returns a list of all the airline's main airports and hubs
     def airline_hubs(self):
         return airlineHubs[self.airline_code()]
 
+    # returns the flight number of the flight
     def flt_no(self):
         airline = no = ''
         for letter in self.callsign:
@@ -140,6 +151,7 @@ class Flight(object):
                 no += letter
         return f"{airlines[airline]} {no}"
 
+    # moves aircraft with current parameters
     def move(self):
         self.path.append(self.pos)
         self.pos[0] += hdgVector(self.hdg, self.spd / 100)[0]
@@ -152,6 +164,7 @@ class Flight(object):
             if type(self) == Arrival and not self.ILS:
                 self.direct_waypoint(self.direct)
 
+    # aircraft banks at a 3 degree angle to change heading to "heading mode"
     def change_hdg(self, hdg):
         if (self.hdg % 360) != hdg:
             if checkDirection(self.hdg, hdg):
@@ -162,12 +175,14 @@ class Flight(object):
                 self.hdgCon = hdg
         else: self.bank = 0
 
+    # aircraft changes speed with a 3kt/s acceleration
     def change_spd(self, spd):
         if self.spd != spd:
             sign = int((spd - self.spd) / abs((spd - self.spd)))
             self.acc = sign * 3
             self.spdCon = spd
 
+    # aircraft changes altitude with 2000 ft/min vertical speed
     def change_alt(self, alt):
         if self.alt != alt:
             sign = int((alt - self.alt) / abs((alt - self.alt)))
@@ -177,11 +192,13 @@ class Flight(object):
             self.vs = 0
             self.altCon = alt
 
+    # checks if aircraft is on the map (within map boundaries)
     def check_on_grid(self, width, height):
         if (0 <= self.pos[0] < width and 0 <= self.pos[1] < height):
             return True
         return False
 
+    # checks for the parameter constraints set when changing alt, hdg, spd, etc.
     def check_constraints(self):
         self.hdg %= 360
         if abs(self.alt - self.altCon) <= 80:
@@ -197,6 +214,7 @@ class Flight(object):
             self.hdg = self.hdgCon
             self.hdgCon = -100
 
+    # aircraft directs to the waypoint and changes to "direct mode"
     def direct_waypoint(self, waypoint):
         req_hdg = vectorHdg(self.pos, waypoint.pos)
         if self.hdg != req_hdg:
@@ -235,10 +253,12 @@ class Departure(Flight):
         if distance(self.pos, self.endWaypoint.pos) < 30:
             self.sent = True
 
+    # aircraft is cleared for takeoff
     def clear_takeoff(self):
         self.cleared = True
 
     # TODO replace with vspeed
+    # aircraft takesoff (accelerates to speed when it will increase in altitude)
     def takeoff(self):
         if self.spd < 145:
             self.acc = 5
@@ -259,38 +279,43 @@ class Arrival(Flight):
         self.ga = random.choice([True] * 1 + [False] * 6)
         self.landed = False
     
+    # aircraft checks for any ILS beacons
     def check_ILS(self, runways):
         for runway in runways:
             #print(distance(self.pos, runway.beacon), self.hdg, runway.hdg)
             if checkLineDistance(runway.beacon, runway.pos, self.pos) and abs(self.hdg - runway.hdg) < 40:
                 self.ILS = True
                 self.runway = runway
+                diff = self.runway.wind[1] - 10
+                if diff > 0:
+                    self.ga = random.choice([True] * (5 + diff) + [False] * 5)
                 self.intercept_ILS(runway)
-                if 0 < self.hdg - runway.hdg < 10:
-                    self.hdg += 3
-                elif -10 < self.hdg - runway.hdg < 0:
-                    self.hdg -= 3
                 self.direct = runway
             if self.ILS:
                 self.capture_gs(self.runway)
                 self.land(self.runway)
 
+    # aircraft decreases in speed during final approach (glideslope)
     def gs_change_spd(self, spd):
         if self.spd != spd:
             sign = int((spd - self.spd) / abs((spd - self.spd)))
             self.acc = sign * 2
             self.spdCon = spd
 
+    # aircraft captures localizer of ILS system which horizontally guides aircraft
     def intercept_ILS(self, runway):
         if checkLineDistance(runway.beacon, runway.pos, self.pos, 8):
             self.direct_waypoint(runway)
 
+    # aircraft captures glideslope that vertically guides aircraft to ground
     def capture_gs(self, runway):
         if self.alt < 4000 and distance(self.pos, runway.pos) < 200:
             time = (distance(self.pos, runway.pos) - 5) / (self.spd / 100)
-            self.vs = - int(self.spd * 5)
+            self.vs = - int(self.spd * 4.8)
             self.gs_change_spd(140)
 
+    # aircraft lands on runway if speed, altitude are 
+    # appropriate and no go around is declared
     def land(self, runway):
         if self.alt < 100 and distance(self.pos, runway.pos) < 15:
             if not self.ga:
@@ -298,9 +323,10 @@ class Arrival(Flight):
             else: 
                 self.go_around()
     
+    # aircraft perform go around procedures
     def go_around(self):
         self.change_alt(3500)
-        self.hdg = (self.runway.hdg + 180) % 360
+        self.hdg = self.runway.hdg
         self.change_spd(210)
         self.ILS = False
         # TODO maybe create go around guidance
@@ -339,15 +365,19 @@ class Airport(object):
         self.size =  self.traffic = size
         self.waypoints = []
 
+    # returns official aircraft name (real world mode)
     def name(self):
         return airports[self.code]
 
+    # aircraft that are larger than the airport size will not be generated
     # TODO create purpose for this condition
     def check_size_limits(self, aircraft):
         if ord(aircraft.size) > ord(self.size):
             return False
         return True
 
+    # generates a size dependent number of random waypoint object
+    # and adds it to the airport's waypoint list
     def create_waypoints(self, width, height):
         # TODO modify frequency of random name lengths
         for i in range(15 * (ord(self.size) - ord("A") + 1)):
@@ -372,6 +402,7 @@ class Runway(object):
         self.open = True
         if airport.size not in ["A", "B"]:
             if list(map(lambda x: x.open, airport.runways)).count(True) > 0:
+                self.wind = airport.winds[int(self.pos[1] // 20)][int(self.pos[0] // 20)]
                 self.open = self.check_winds(airport.winds)
         else: self.open = True
         #print(list(map(lambda x: x.open, filter(lambda x: x.open == True, airport.runways))))
@@ -381,20 +412,21 @@ class Runway(object):
         self.beacon = [self.pos[0] - hdgVector(self.hdg, 10 * self.plength)[0], 
                         self.pos[1] + hdgVector(self.hdg, 10 * self.plength)[1]]
 
+    # if wind heading and spd is greater than legal crosswind limits, the runway is closed
     def check_winds(self, winds):
         x, y = int(self.pos[0] // 20), int(self.pos[1] // 20)
         if ((abs(winds[y][x][0] - self.hdg) < 80 or abs(winds[y][x][0] - self.hdg + 180) % 360 < 80) and winds[y][x][1] < 10):
             return True
         return False
 
+    # returns the three points of isosceles triangle with the 
+    # beacon as the mid point of the base and the runway as the upper point
     def range_ILS(self):
         norm = normalVector(list(map(lambda x,y: x-y, self.beacon, self.pos)))
         p2 = list(map(lambda x,y: x - y / 15, self.beacon, norm))
         p3 = list(map(lambda x,y: x + y / 15, self.beacon, norm))
         p1 = self.pos
         return p1, p2, p3
-
-        #abs(self.hdg - airport.wind) < 30 or abs((self.hdg + 180) % 360 - airport.wind) < 30
 
 class Weather(object):
 
@@ -411,5 +443,4 @@ class Weather(object):
     def createWinds(self, airport):
         pass
 
-    def landing_success(self, airport):
-        pass
+testCheckDirection()

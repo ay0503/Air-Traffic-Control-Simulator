@@ -7,7 +7,6 @@ from draw_functions import *
 from weather import winds
 import time, string, random
 
-#* AI FOR WEATHER AVOIDANCE
 #* WEATHER EVENTS THAT AFFECT AIRPORT AND AIRCRAFT
 #* WINDS, STORMS
 #* PROBABILITY OF LANDINGS
@@ -29,17 +28,20 @@ def appStarted(app):
     
     # app states
     app.crash = False
-    app.selected = None
     app.selected_waypoint = None
     app.startTime = time.time()
     app.type = False
     app.draw = []
-    app.pro = False
+    app.pro = True
     app.score = 0
+    app.debug = False
     app.finished = set()
     app.pressure = noiseMap
     app.image1 = Image.new(mode='RGB', size=(app.mapWidth, app.mapHeight))
-    # airports
+    app.timerDelay = 1000
+    app.index = 0
+    app.timer = 0
+
     #* FUTURE GAMEMODES: Real World Data, Random Generated Data, Maybe? Custom building
     # pre generation
     """ app.airport = Airport("KLAX", [app.mapWidth / 2, app.mapHeight / 2], [], 'F')
@@ -54,16 +56,11 @@ def appStarted(app):
     app.airport.create_waypoints(app.mapWidth, app.mapHeight)
     print("Size:", app.airport.size)
     app.weather = Weather(app.airport, winds)
-    #pprint(f"Airport: {vars(app.airport)}")
-
-    # inital parameters
-    app.timerDelay = 1000
-    app.index = 0
-    app.timer = 0
     
-    # aircrafts
+    # flights
     app.flights = [createArrival(app.mapWidth, app.mapHeight, app.airport),
                     createDeparture(app.airport)]
+    app.selected = app.flights[0]
     app.sticks = 5
     app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
 
@@ -93,6 +90,8 @@ def keyPressed(app, event):
     elif event.key == "+":
         app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
         app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
+    elif event.key == "y":
+        app.debug = not app.debug
 
 def mousePressed(app, event):
     # command input click
@@ -122,7 +121,7 @@ def sizeChanged(app):
 
 # dragging flights for debugging
 def mouseDragged(app, event):
-    if app.selected != None:
+    if app.selected != None and app.debug:
         app.selected.pos = [event.x, event.y]
     app.draw.append((event.x, event.y))
 
@@ -148,7 +147,7 @@ def timerFired(app):
                 app.finished.add(flight)
     checkSafety(app.flights)
     # create arrivals every 30 seconds
-    if app.timer % 10 == 0 and app.timer > 0 and len(app.flights) < 10:
+    if int(app.timer % 120) == 0 and int(app.timer) > 0 and len(app.flights) < 6:
         app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
         """ if not flight.check_on_grid(app.mapWidth, app.mapHeight):
             app.flights.remove(aircraft) """

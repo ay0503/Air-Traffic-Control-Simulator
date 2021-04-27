@@ -12,23 +12,13 @@ def noise():
     return L
 
 # https://www.cs.cmu.edu/~112/notes/notes-2d-lists.html#printing
-def maxItemLength(a):
-    maxLen = 0
-    rows = len(a)
-    cols = len(a[0])
-    for row in range(rows):
-        for col in range(cols):
-            maxLen = max(maxLen, len(str(a[row][col])))
-    return maxLen
-
-# https://www.cs.cmu.edu/~112/notes/notes-2d-lists.html#printing
 def print2dList(a):
     if (a == []):
         # So we don't crash accessing a[0]
         print([])
         return
     rows, cols = len(a), len(a[0])
-    fieldWidth = maxItemLength(a)
+    fieldWidth = len(a[0])
     print('[')
     for row in range(rows):
         print(' [ ', end='')
@@ -48,6 +38,7 @@ def wind(L):
     removeZeros(result)
     return result
 
+# calculate wind from average air pressure differences
 def createWind(L, x, y):
     result = []
     for dx in [-1, 0, +1]:
@@ -69,6 +60,7 @@ def createWind(L, x, y):
     spd = distance([0,0], start) / 7
     return [hdg, spd * 3]
 
+# removes zeros from first and last rows and cols
 def removeZeros(L):
     for row in L:
         row.remove(0)

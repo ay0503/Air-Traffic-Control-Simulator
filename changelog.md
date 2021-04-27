@@ -109,3 +109,7 @@ create arrival generator
 - added crash, fuel limit debug commands
 - ILS now captures along localizer line
 - flights now follow localizer after lining up with runway
+
+4/28/2021 - 5 hours
+- flight generation now depends on airport and aircraft size
+- flight speed generation now depends on aircraft size class (update: removed)

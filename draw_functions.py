@@ -205,8 +205,7 @@ def drawGameOver(app, canvas):
     canvas.create_text(app.mapWidth / 2, app.mapHeight / 2, text = "GAME OVER", 
                         font = "Arial 45 bold", fill = app.color)
     canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 + 70, text = f"Score: {app.score}", 
-                        font = "Arial 30 bold", fill = app.color)               
-    pass
+                        font = "Arial 30 bold", fill = app.color)         
 
 def drawStorm(app, canvas, pmap):
     image = app.image1
