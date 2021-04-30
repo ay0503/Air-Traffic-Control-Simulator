@@ -286,9 +286,9 @@ class Arrival(Flight):
             if checkLineDistance(runway.beacon, runway.pos, self.pos) and abs(self.hdg - runway.hdg) < 40:
                 self.ILS = True
                 self.runway = runway
-                diff = self.runway.wind[1] - 10
+                """ diff = self.runway.wind[1] - 10
                 if diff > 0:
-                    self.ga = random.choice([True] * (5 + diff) + [False] * 5)
+                    self.ga = random.choice([True] * (5 + diff) + [False] * 5) """
                 self.intercept_ILS(runway)
                 self.direct = runway
             if self.ILS:
@@ -309,10 +309,11 @@ class Arrival(Flight):
 
     # aircraft captures glideslope that vertically guides aircraft to ground
     def capture_gs(self, runway):
-        if self.alt < 4000 and distance(self.pos, runway.pos) < 200:
+        if 0 < self.alt < 4000 and distance(self.pos, runway.pos) < 200:
             time = (distance(self.pos, runway.pos) - 5) / (self.spd / 100)
             self.vs = - int(self.spd * 4.8)
             self.gs_change_spd(140)
+        else: self.vs = 0
 
     # aircraft lands on runway if speed, altitude are 
     # appropriate and no go around is declared
@@ -411,6 +412,7 @@ class Runway(object):
         self.plength = self.length / 400
         self.beacon = [self.pos[0] - hdgVector(self.hdg, 10 * self.plength)[0], 
                         self.pos[1] + hdgVector(self.hdg, 10 * self.plength)[1]]
+        #self.wind = airport.winds[self.pos[1] // 20, self.pos[0] // 20]
 
     # if wind heading and spd is greater than legal crosswind limits, the runway is closed
     def check_winds(self, winds):

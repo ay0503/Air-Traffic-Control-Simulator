@@ -1,15 +1,6 @@
 import numpy as np
 from objects import *
-
-# external code
-# https://www.kite.com/python/answers/how-to-add-noise-to-a-signal-using-numpy-in-python
-def noise():
-    # used as air pressure map
-    L = np.random.normal(0, 0.3, (53,85))
-    for y in range(len(L)):
-        for x in range(len(L[0])):
-            L[y][x] = '%.3f' % L[y][x]
-    return L
+from perlin_noise import result
 
 # https://www.cs.cmu.edu/~112/notes/notes-2d-lists.html#printing
 def print2dList(a):
@@ -60,12 +51,29 @@ def createWind(L, x, y):
     spd = distance([0,0], start) / 7
     return [hdg, spd * 3]
 
+def stormCloud(L):
+    result = L
+    for y in range(len(L)):
+        for x in range(len(L[0])):
+            a, b, c, d = -2.5, -0.4, 0.1, 0.6
+            if a < L[y][x] <= b:
+                result[y][x] = "black"
+            elif b < L[y][x] <= c:
+                result[y][x] = "green"
+            elif c < L[y][x] <= d:
+                result[y][x] = "yellow"
+            elif d < L[y][x]:
+                result[y][x] = "red" 
+    return result
+
 # removes zeros from first and last rows and cols
 def removeZeros(L):
     for row in L:
         row.remove(0)
     L.pop()
 
-noiseMap = noise()
+noiseMap = result
 #print2dList(noiseMap)
 winds = wind(noiseMap)
+
+#print(stormCloud(noiseMap))

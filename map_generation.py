@@ -1,16 +1,7 @@
 from objects import *
 from cmu_112_graphics import *
-import numpy as np
+from perlin_noise import result
 
-# external code
-def noise():
-    # used as air pressure map
-    # https://www.kite.com/python/answers/how-to-add-noise-to-a-signal-using-numpy-in-python
-    L = np.random.normal(0, 0.5, (51,83))
-    for y in range(len(L)):
-        for x in range(len(L[0])):
-            L[y][x] = '%.3f' % L[y][x]
-    return L
 # https://www.cs.cmu.edu/~112/notes/notes-2d-lists.html#printing
 def print2dList(a):
     if (a == []):
@@ -66,7 +57,7 @@ def removeZeros(L):
         row.remove(0)
     L.pop()
 
-noiseMap = noise()
+noiseMap = result
 #print2dList(noiseMap)
 winds = wind(noiseMap)
 
@@ -90,10 +81,11 @@ def getCellBounds(app, row, col):
 def drawBoard(app, canvas):
     for row in range(len(app.winds)):
         for col in range(len(app.winds[0])):
+            #color = colorMap[row][col]
             wind = app.winds[row][col]
             (x0, y0, x1, y1) = getCellBounds(app, row, col)
             midx, midy = (x0 + x1) * 0.5, (y0 + y1) * 0.5
-            canvas.create_rectangle(x0, y0, x1, y1, fill='white')
+            canvas.create_rectangle(x0, y0, x1, y1, fill = "white")
             canvas.create_line(midx, midy, 
                     midx + hdgVector(wind[0], 10 * wind[1])[0],
                     midy + hdgVector(wind[0], 10 * wind[1])[1],
@@ -102,4 +94,4 @@ def drawBoard(app, canvas):
 def redrawAll(app, canvas):
     drawBoard(app, canvas)
 
-runApp(width=1660, height=1020)
+#runApp(width = len(result[0]) * 10, height = len(result) * 10)
