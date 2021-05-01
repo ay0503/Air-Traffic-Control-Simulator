@@ -15,3 +15,4 @@ def hdgVector(hdg, spd):
     return spd * math.cos(angle), spd * math.sin(angle)
 
 #print("heading = ", heading, "angle = ", hdgVector(heading, 300))
+

@@ -1,4 +1,3 @@
-import numpy as np
 from objects import *
 from perlin_noise import result
 
@@ -51,19 +50,35 @@ def createWind(L, x, y):
     spd = distance([0,0], start) / 7
     return [hdg, spd * 3]
 
+def changeRange(L):
+    right, left = -1, 1
+    for row in L:
+        if max(row) > right:
+            right = max(row)
+        elif min(row) < left:
+            left = min(row)
+    result = copy.deepcopy(L)
+    scale = 1 / (right - left)
+    for y in range(len(result)):
+        for x in range(len(result[0])):
+            result[y][x] = (result[y][x] - left) * scale - 1
+    return result
+
 def stormCloud(L):
     result = L
+    scale = random.uniform(-0.01, 0.05)
     for y in range(len(L)):
         for x in range(len(L[0])):
-            a, b, c, d = -2.5, -0.4, 0.1, 0.6
-            if a < L[y][x] <= b:
-                result[y][x] = "black"
-            elif b < L[y][x] <= c:
-                result[y][x] = "green"
-            elif c < L[y][x] <= d:
-                result[y][x] = "yellow"
-            elif d < L[y][x]:
-                result[y][x] = "red" 
+            # regular
+            a, b, c, d = -1.1, -0.99, -0.97, -0.93
+            if a <= L[y][x] + scale <= b:
+                result[y][x] = "firebrick1"
+            elif b < L[y][x] + scale <= c:
+                result[y][x] = "yellow3"
+            elif c < L[y][x] + scale <= d:
+                result[y][x] = "green3"
+            elif d < L[y][x] + scale:
+                result[y][x] = "black" 
     return result
 
 # removes zeros from first and last rows and cols

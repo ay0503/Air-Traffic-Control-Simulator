@@ -14,6 +14,7 @@ def appStarted(app):
             app.image1.putpixel((x,y),(val,val,val))
 
 def redrawAll(app, canvas):
+    pass
     canvas.create_image(app.width / 2, app.height / 2, image=ImageTk.PhotoImage(app.image1))
 
 runApp(width = len(result[0] * 10), height = len(result) * 10)

@@ -1,14 +1,16 @@
 from cmu_112_graphics import *
 from objects import *
 from weather import noiseMap
+from storm_radar import drawClouds
 
 def drawBackground(app, canvas):
     canvas.create_rectangle(0, 0, app.mapWidth, app.mapHeight, fill = 'black')
     increment = 200
+    drawClouds(app, canvas)
     for dist in range(0, app.width, increment):
         canvas.create_oval(app.airport.pos[0] - dist, app.airport.pos[1] - dist,
                             app.airport.pos[0] + dist, app.airport.pos[1] + dist,
-                            outline = app.color, dash = (1, 1))
+                            outline = app.color, dash = (1, 1), width = 2)
     if app.selected != None:
         canvas.create_text(app.mapWidth - 20, app.mapHeight - 20, anchor = 'e', 
                         text = f"{app.selected.callsign} - {app.selected.flt_no()}", 
@@ -24,10 +26,11 @@ def drawAirport(app, canvas):
         if runway.open:
             color = 'light green'
             # draw ILS range
-            canvas.create_line(p1, p2, fill = app.color, dash = (1, 1))
-            canvas.create_line(p1, p3, fill = app.color, dash = (1, 1))
-            canvas.create_line(p3, p2, fill = app.color, dash = (1, 1))
-            canvas.create_line(runway.pos, runway.beacon, fill = app.color, dash = (1, 1))
+            canvas.create_line(p1, p2, fill = app.color, dash = (1, 1), width = 1.5)
+            canvas.create_line(p1, p3, fill = app.color, dash = (1, 1), width = 1.5)
+            canvas.create_line(p3, p2, fill = app.color, dash = (1, 1), width = 1.5)
+            canvas.create_line(runway.pos, runway.beacon, fill = app.color, 
+                                dash = (1, 1), width = 1.5)
             # max beacon position
             canvas.create_oval(cx - 2, cy - 2, cx + 2, cy + 2, fill = app.color)
         # draw runway
@@ -41,7 +44,7 @@ def drawWaypoints(app, canvas):
         p3 = (cx - 6 / 3 ** 0.5, cy + 2)
         canvas.create_polygon(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1], fill = app.color)
         canvas.create_text(cx - 5, cy - 5, text = waypoint.name, 
-                        font = "Arial 9", fill = "sky blue", anchor = 'e')
+                        font = "Arial 9 bold", fill = app.color, anchor = 'e')
 
 # draws aircraft and information
 def drawAircraft(app, canvas, plane, color):
@@ -49,22 +52,22 @@ def drawAircraft(app, canvas, plane, color):
     x, y = plane.pos
     r = 40
     # aircraft
-    canvas.create_rectangle(x - 5, y - 5, x + 5, y + 5, outline = color)
+    canvas.create_rectangle(x - 5, y - 5, x + 5, y + 5, outline = color, width = 2)
     # pointer
     canvas.create_line(x, y, x + hdgVector(plane.hdg, plane.spd / 6)[0],
-                y - hdgVector(plane.hdg, plane.spd / 6)[1], fill = color)
+                y - hdgVector(plane.hdg, plane.spd / 6)[1], fill = color, width = 2)
     # trajectory
     if app.selected == plane:
         if app.selected.direct == None:
             canvas.create_line(x, y, x + hdgVector(app.selected.hdg, 5 * app.selected.spd)[0],
                         y - hdgVector(app.selected.hdg, 5 * app.selected.spd)[1], fill = color,
-                        dash = (1, 1))
+                        dash = (1, 1), width = 2)
         elif type(app.selected) == Arrival and app.selected.ILS == True:
             canvas.create_line(app.selected.pos[0], app.selected.pos[1], app.selected.runway.pos[0], app.selected.runway.pos[1], 
-                                fill = color, dash = (1, 1))
+                                fill = color, dash = (1, 1), width = 2)
         else:
             canvas.create_line(app.selected.pos[0], app.selected.pos[1], app.selected.direct.pos[0], app.selected.direct.pos[1], 
-                                fill = color, dash = (1, 1))
+                                fill = color, dash = (1, 1), width = 2)
     # change anchor opposite to pointer
     if plane.hdg < 180: anchor, offset = "e", -10
     else: anchor, offset = "w", 10
@@ -74,13 +77,13 @@ def drawAircraft(app, canvas, plane, color):
     if not plane.safe: color = 'red'
     # safety ring
     # TODO sidebar aircraft stick turns red
-    canvas.create_oval(x - r, y - r, x + r, y + r, outline = color, dash = (1, 1))
+    canvas.create_oval(x - r, y - r, x + r, y + r, outline = color, dash = (1, 1), width = 2)
     # basic drawing feature
     if app.selected == plane:
         for i in range(len(plane.path) - 1):
             x0, y0 = plane.path[i]
             x1, y1 = plane.path[i + 1]
-            canvas.create_line(x0, y0, x1, y1, fill = 'light green')
+            canvas.create_line(x0, y0, x1, y1, fill = 'light green', width = 2)
 
 def drawDeparture(app, canvas, plane):
     if not plane.sent:
@@ -207,12 +210,18 @@ def drawGameOver(app, canvas):
     canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 + 70, text = f"Score: {app.score}", 
                         font = "Arial 30 bold", fill = app.color)         
 
-def drawStorm(app, canvas, pmap):
-    image = app.image1
-    print(len(pmap), len(pmap[0]))
-    for x in range(app.image1.width):
-        for y in range(app.image1.height):
-            val = int(pmap[y // 20][x // 20] * 255)
-            image.putpixel((x,y),(val,val,val))
-    canvas.create_image(app.mapWidth / 2, app.mapHeight / 2, image=ImageTk.PhotoImage(image))
-    
+def getCellBounds(app, row, col):
+    gridWidth  = app.mapWidth
+    gridHeight = app.mapHeight
+    x0 = gridWidth * col / app.cols
+    x1 = gridWidth * (col + 1) / app.cols
+    y0 = gridHeight * row / app.rows
+    y1 = gridHeight * (row + 1) / app.rows
+    return (x0, y0, x1, y1)
+
+def drawClouds(app, canvas):
+    for row in range(len(app.storm)):
+        for col in range(len(app.storm[0])):
+            color = app.storm[row][col]
+            (x0, y0, x1, y1) = getCellBounds(app, row, col)
+            canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = color)

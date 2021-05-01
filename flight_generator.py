@@ -98,7 +98,7 @@ def newArrivalFuel(size):
         fuel = 0.25 * 535
     else: 
         # based on linear regression of aircraft fuel capacity data
-        fuel = 0.25 * ((ord(size) - ord("A")) * 42742 - 82945)
+        fuel = 0.25 * abs((ord(size) - ord("A")) * 42742 - 82945)
     return fuel
 
 # generates fuel for departing aircraft based on size

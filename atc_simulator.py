@@ -4,8 +4,9 @@ from flight_generator import *
 from airport_generation import *
 from commands import *
 from draw_functions import *
-from weather import winds
-import time, string, random
+from weather import winds, stormCloud, changeRange
+from perlin_noise import result, minAndMax
+import time, string
 
 #* WEATHER EVENTS THAT AFFECT AIRPORT AND AIRCRAFT
 #* WINDS, STORMS
@@ -41,6 +42,9 @@ def appStarted(app):
     app.timerDelay = 1000
     app.index = 0
     app.timer = 0
+    app.rows = app.mapHeight // 10
+    app.cols = app.mapWidth // 10
+    app.cause = None
 
     #* FUTURE GAMEMODES: Real World Data, Random Generated Data, Maybe? Custom building
     # pre generation
@@ -55,7 +59,10 @@ def appStarted(app):
     app.airport = generateAirport([app.mapWidth / 2, app.mapHeight / 2])
     app.airport.create_waypoints(app.mapWidth, app.mapHeight)
     print("Size:", app.airport.size)
+    # TODO implement storms as part of the weather object
     app.weather = Weather(app.airport, winds)
+    app.storm = stormCloud(changeRange(result))
+    print(minAndMax(changeRange(result)))
     
     # flights
     app.flights = [createArrival(app.mapWidth, app.mapHeight, app.airport),
@@ -153,7 +160,6 @@ def timerFired(app):
             app.flights.remove(aircraft) """
 
 def redrawAll(app, canvas):
-    #drawStorm(app, canvas, app.pressure)
     drawBackground(app, canvas)
     drawAirport(app, canvas)
     for flight in app.flights:

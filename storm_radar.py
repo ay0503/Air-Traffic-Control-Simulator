@@ -1,14 +1,14 @@
 from objects import *
 from cmu_112_graphics import *
 from perlin_noise import result
-from weather import stormCloud
+from weather import stormCloud, changeRange
 
 # draw storm cloud
 def appStarted(app):
     app.margin = 5
-    app.rows = 100
-    app.cols = 100
-    app.storm = stormCloud(result)
+    app.rows = 90
+    app.cols = 160
+    app.storm = stormCloud(changeRange(result))
 
 def getCellBounds(app, row, col):
     gridWidth  = app.width - 2 * app.margin
@@ -20,7 +20,7 @@ def getCellBounds(app, row, col):
     return (x0, y0, x1, y1)
 
 # draw wind board
-def drawBoard(app, canvas):
+def drawClouds(app, canvas):
     for row in range(len(app.storm)):
         for col in range(len(app.storm[0])):
             color = app.storm[row][col]
@@ -28,6 +28,6 @@ def drawBoard(app, canvas):
             canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = color)
 
 def redrawAll(app, canvas):
-    drawBoard(app, canvas)
+    drawClouds(app, canvas)
 
-runApp(width = len(result[0]) * 10, height = len(result) * 10)
+#runApp(width = len(result[0]) * 10, height = len(result) * 10)

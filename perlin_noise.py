@@ -1,15 +1,29 @@
-import random
+import random, copy
 
-width = height = 1
+def minAndMax(L):
+    right, left = -1, 1
+    for row in L:
+        if max(row) > right:
+            right = max(row)
+        elif min(row) < left:
+            left = min(row)
+    return left, right
 
 # https://www.cs.cmu.edu/~112/notes/notes-2d-lists.html#printing
+def maxItemLength(a):
+    maxLen = 0
+    for row in range(len(a)):
+        for col in range(len(a[row])):
+            maxLen = max(maxLen, len(repr(a[row][col])))
+    return maxLen
+
 def print2dList(a):
     if (a == []):
         # So we don't crash accessing a[0]
         print([])
         return
     rows, cols = len(a), len(a[0])
-    fieldWidth = len(a[0])
+    fieldWidth = maxItemLength(a)
     print('[')
     for row in range(rows):
         print(' [ ', end='')
@@ -54,32 +68,36 @@ def noise(x, y, scale):
     bottom = interpolate(dx, dot(g3, d3), dot(g4, d4))
     return interpolate(dy, top, bottom) * scale
 
-result = [[0] * (width * 100) for y in range(height * 100)]
+width, height = 166, 102
+result = [[0] * (width) for y in range(height)]
 
 octaves = 2
 
 def octave(result, per, lac):
+    a = random.uniform(0.5, 2)
+    dx, dy = random.random(), random.random()
     for y in range(len(result)):
         for x in range(len(result[0])):
-            amp = 4
-            freq = 1
+            amp = 10
+            freq = 0.1
             noiseH = 0
             for i in range(octaves):
-                noiseH += noise(x * freq / 10, y * freq / 10, 0.1) * amp +  + f(x, y, len(result[0]), len(result))
+                noiseH += (2 * noise(x * freq, y * freq, 1) + 1) * f(x, y, len(result[0]), 
+                            len(result), dx, dy, a)
                 amp *= per
                 freq *= lac
-            result[y][x] = noiseH
+            result[y][x] = float("{:.2f}".format(noiseH))
     return result
 
-def f(x, y, width, height):
-    return - ((x - width / 2) / width) ** 2 - ((y - height / 2) / height )** 2
+def f(x, y, width, height, dx, dy, a):
+    return ((a * (x - dx * width) / width) ** 2 + ((y - dy * height) / height) ** 2)
 
 def Noise2D(L):
     for y in range(len(L)):
         for x in range(len(L[0])):
-            L[y][x] = noise(x / 10, y / 10, 2)
+            L[y][x] = (noise(x / 100, y / 100, 1) + 1) / 2
     return L 
 
-result = octave(result, 4, 16)
+result = octave(result, 0.4, 1)
 #print2dList(result)
 #result = octave(result, 10, 4000)
