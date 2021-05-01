@@ -8,6 +8,7 @@ from weather import winds, stormCloud, changeRange
 import time, string
 
 #!!! IF THE GAME IS TOO SLOW, PRESS "X" TO DISABLE WEATHER VISUALIZATION
+#!!! BUG ON MACOS WHERE AIRCRAFT SPAWNS UNDER COMMMAND PROMPT (not on Windows)
 
 def appStarted(app):
     # graphics
