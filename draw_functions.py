@@ -3,10 +3,12 @@ from objects import *
 from weather import noiseMap
 from storm_radar import drawClouds
 
+# draws weather, range rings (200nm)
 def drawBackground(app, canvas):
     canvas.create_rectangle(0, 0, app.mapWidth, app.mapHeight, fill = 'black')
     increment = 200
-    drawClouds(app, canvas)
+    if not app.not_draw:
+        drawClouds(app, canvas)
     for dist in range(0, app.width, increment):
         canvas.create_oval(app.airport.pos[0] - dist, app.airport.pos[1] - dist,
                             app.airport.pos[0] + dist, app.airport.pos[1] + dist,
@@ -16,6 +18,7 @@ def drawBackground(app, canvas):
                         text = f"{app.selected.callsign} - {app.selected.flt_no()}", 
                         font = "Arial 14 bold", fill = app.color)
 
+# draws runways, ils vectors
 def drawAirport(app, canvas):
     cx, cy = app.mapWidth / 2, app.mapHeight / 2
     for runway in app.airport.runways:
@@ -122,7 +125,10 @@ def drawSidebarDetails(app, canvas):
             key = app.selected.details[row]
             if key == 'type':
                 data = vars(app.selected)[key].name
-            else: data = vars(app.selected)[key]
+            else: 
+                data = vars(app.selected)[key]
+                if isinstance(data, float):
+                    data = int(data)
             canvas.create_text(app.mapWidth + 3 * app.margin, y0 + (row + 1) * app.margin + (row + 0.5) * 20, 
                             text = f"{key.capitalize()}: {data}",  font = 'Arial 12 bold', anchor = 'w')
 
@@ -220,8 +226,8 @@ def getCellBounds(app, row, col):
     return (x0, y0, x1, y1)
 
 def drawClouds(app, canvas):
-    for row in range(len(app.storm)):
-        for col in range(len(app.storm[0])):
-            color = app.storm[row][col]
+    for row in range(len(app.airport.storm)):
+        for col in range(len(app.airport.storm[0])):
+            color = app.airport.storm[row][col]
             (x0, y0, x1, y1) = getCellBounds(app, row, col)
             canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = color)

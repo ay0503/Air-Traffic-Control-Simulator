@@ -42,9 +42,9 @@ def checkSafety(aircrafts):
             if fl1.pos != fl2.pos:
                 d = distance(fl1.pos, fl2.pos)
                 altDiff = abs(fl1.alt - fl2.alt)
-                if d < 80 and altDiff < 500:
+                if d < 80 and altDiff < 1000:
                     fl1.safe = fl2.safe = False
-                elif d < 30 and altDiff < 60:
+                elif d < 80 and altDiff < 500:
                     fl1.safe = fl2.safe = False
                     fl1.crash = fl2.crash = True
                 else:
@@ -105,7 +105,7 @@ class Flight(object):
         self.spd = spd
         self.alt = alt
         self.vs = vs
-        self.fuelRate = int(fuel / 300) + 1
+        self.fuelRate = int(fuel / 500) + 0.01
         self.start = start
         self.end = end
         self.direct = None
@@ -257,7 +257,7 @@ class Departure(Flight):
     def clear_takeoff(self):
         self.cleared = True
 
-    # TODO replace with vspeed
+    # TODO replace with vspeed 
     # aircraft takesoff (accelerates to speed when it will increase in altitude)
     def takeoff(self):
         if self.spd < 145:
@@ -340,7 +340,7 @@ class Aircraft(object):
         self.size = size
         self.freq = freq
 
-# TODO maybe add waypoints to ILS line
+# TODO maybe add waypoints to ILS final
 class Waypoint(object):
 
     def __init__(self, name, pos):
@@ -361,8 +361,8 @@ class Airport(object):
     def __init__(self, code, pos, runways, size, winds):
         self.pos = pos
         self.code = code
-        self.weather = Weather(self, winds)
         self.runways = runways
+        self.winds = winds
         self.size =  self.traffic = size
         self.waypoints = []
 
@@ -432,8 +432,8 @@ class Runway(object):
 
 class Weather(object):
 
-    def __init__(self, airport, winds):
-        self.storm = []
+    def __init__(self, airport, winds, storm):
+        airport.storm = self.storm = storm
         self.stormLevel = random.randrange(0,3)
         self.winds = airport.winds = winds
         self.visibility = self.stormLevel

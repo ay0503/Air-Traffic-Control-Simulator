@@ -33,8 +33,10 @@ def createWind(L, x, y):
     result = []
     for dx in [-1, 0, +1]:
         for dy in [-1, 0, +1]:
+            # if pressure difference is not zero
             if (dx and dy) != 0:
                 diff = L[y + dy][x + dx] - L[y][x]
+                # direction based pressure differences
                 if diff > 0:
                     wind = [[-dx, -dy], 10 * abs(diff)]
                 elif diff < 0: 
@@ -50,6 +52,7 @@ def createWind(L, x, y):
     spd = distance([0,0], start) / 7
     return [hdg, spd * 3]
 
+# returns list scaled to a range of -1, 1
 def changeRange(L):
     right, left = -1, 1
     for row in L:
@@ -64,13 +67,15 @@ def changeRange(L):
             result[y][x] = (result[y][x] - left) * scale - 1
     return result
 
+# returns color map of weather map
 def stormCloud(L):
     result = L
-    scale = random.uniform(-0.01, 0.05)
+    #! scale to control storm probability
+    scale = random.uniform(-0.05, 0)
     for y in range(len(L)):
         for x in range(len(L[0])):
             # regular
-            a, b, c, d = -1.1, -0.99, -0.97, -0.93
+            a, b, c, d = -1.1, -1.03, -1, -0.93
             if a <= L[y][x] + scale <= b:
                 result[y][x] = "firebrick1"
             elif b < L[y][x] + scale <= c:
@@ -81,7 +86,8 @@ def stormCloud(L):
                 result[y][x] = "black" 
     return result
 
-# removes zeros from first and last rows and cols
+# removes zeros from first and last rows and cols 
+# (pressure map starts from 1st row and ends before last row)
 def removeZeros(L):
     for row in L:
         row.remove(0)
@@ -89,6 +95,6 @@ def removeZeros(L):
 
 noiseMap = result
 #print2dList(noiseMap)
-winds = wind(noiseMap)
+winds = wind(changeRange(noiseMap))
 
 #print(stormCloud(noiseMap))

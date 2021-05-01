@@ -5,16 +5,10 @@ from airport_generation import *
 from commands import *
 from draw_functions import *
 from weather import winds, stormCloud, changeRange
-from perlin_noise import result, minAndMax
+from perlin_noise import result
 import time, string
 
-#* WEATHER EVENTS THAT AFFECT AIRPORT AND AIRCRAFT
-#* WINDS, STORMS
-#* PROBABILITY OF LANDINGS
-#* EXTRA CONTROL MODES
-#* CONSTRAINTS THAT END THE GAME(SAFETY VIOLATION)
-#* SAFETY: Proximity, Fuel, 
-#* GOAL STATES: Scores (motivation)
+#!!! IF THE GAME IS TOO SLOW, PRESS "X" TO DISABLE WEATHER VISUALIZATION
 
 def appStarted(app):
     # graphics
@@ -45,6 +39,7 @@ def appStarted(app):
     app.rows = app.mapHeight // 10
     app.cols = app.mapWidth // 10
     app.cause = None
+    app.not_draw = False
 
     #* FUTURE GAMEMODES: Real World Data, Random Generated Data, Maybe? Custom building
     # pre generation
@@ -60,9 +55,7 @@ def appStarted(app):
     app.airport.create_waypoints(app.mapWidth, app.mapHeight)
     print("Size:", app.airport.size)
     # TODO implement storms as part of the weather object
-    app.weather = Weather(app.airport, winds)
-    app.storm = stormCloud(changeRange(result))
-    print(minAndMax(changeRange(result)))
+    app.airport.weather = Weather(app.airport, winds, stormCloud(changeRange(result)))
     
     # flights
     app.flights = [createArrival(app.mapWidth, app.mapHeight, app.airport),
@@ -99,6 +92,8 @@ def keyPressed(app, event):
         app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
     elif event.key == "y":
         app.debug = not app.debug
+    elif event.key == "x":
+        app.not_draw = not app.not_draw
 
 def mousePressed(app, event):
     # command input click
@@ -156,18 +151,18 @@ def timerFired(app):
     # create arrivals every 30 seconds
     if int(app.timer % 120) == 0 and int(app.timer) > 0 and len(app.flights) < 6:
         app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
-        """ if not flight.check_on_grid(app.mapWidth, app.mapHeight):
-            app.flights.remove(aircraft) """
+        if not flight.check_on_grid(app.mapWidth, app.mapHeight):
+            app.flights.remove(flight)
 
 def redrawAll(app, canvas):
     drawBackground(app, canvas)
     drawAirport(app, canvas)
+    drawCommandInput(app, canvas)
     for flight in app.flights:
         if type(flight) == Departure:
             drawDeparture(app, canvas, flight)
         else: drawArrival(app, canvas, flight)
     drawWaypoints(app, canvas)
-    drawCommandInput(app, canvas)
     drawSidebar(app, canvas)
     drawWind(app, canvas)
     if app.crash:

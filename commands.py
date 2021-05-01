@@ -27,12 +27,15 @@ def letterCounts(word):
 def closeEnough(typo, word, index):
     diff = 0
     typoData, wordData = letterCounts(typo), letterCounts(word)
+    # if letter isn't contained
     for key in wordData:
         if key not in typoData.keys():
             diff += 1
         else:
+        # dissimilarity += letter count differences
             diff += abs(typoData[key] - wordData[key])
     for i in range(min(len(word), len(typo))):
+        # check substrings
         if not ((typo[i:] in word[i:]) or (word[i:] in typo[i:])):
             diff += 1
     return diff / (2 * len(word)) < index
@@ -174,7 +177,7 @@ def divideCommand(cmd, flights, airport):
 def debugExecuteCommand(flights, airport, cmd):
     fuel = None
     if "fuel" in cmd:
-        fuel = 3000
+        fuel = 300
     (callsign, alt, wpt, hdg, spd, clr) = divideCommand(cmd, flights, airport)
     flight = None
     for fl in flights:

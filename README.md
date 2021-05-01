@@ -25,3 +25,5 @@ Shortcuts:
 +: Adds new arrival flight
 -: Removes the last flight on the list
 Up and Down: Scroll through flight list on the sidebar
+y: debug mode for dragging planes
+x: disable weather visualization

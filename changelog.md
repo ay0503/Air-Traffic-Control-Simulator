@@ -113,3 +113,13 @@ create arrival generator
 4/28/2021 - 5 hours
 - flight generation now depends on airport and aircraft size
 - flight speed generation now depends on aircraft size class (update: removed)
+
+4/29/2021 - 6 hours
+- created base perlin noise algorithm
+- added persistence, octaves, lacunarity, and amplitude parameters to algorithm
+- added noise map visualizer
+
+4/30/2021 - 7.2 hours
+- created storm map based on noise map
+- implemented storm map to simulator as cell grid
+- implemented wind map to simulator as backend weather feature

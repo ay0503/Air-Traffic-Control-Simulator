@@ -95,7 +95,7 @@ def newDepartureRoute(airport):
 # 25% fuel remaining average during approach
 def newArrivalFuel(size):
     if size == 'A':
-        fuel = 0.25 * 535
+        fuel = 535
     else: 
         # based on linear regression of aircraft fuel capacity data
         fuel = 0.25 * abs((ord(size) - ord("A")) * 42742 - 82945)

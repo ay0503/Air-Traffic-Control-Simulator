@@ -94,4 +94,4 @@ def drawBoard(app, canvas):
 def redrawAll(app, canvas):
     drawBoard(app, canvas)
 
-runApp(width = len(result[0]) * 10, height = len(result) * 10)
+#runApp(width = len(result[0]) * 10, height = len(result) * 10)
