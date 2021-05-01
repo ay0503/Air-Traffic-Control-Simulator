@@ -71,7 +71,7 @@ def changeRange(L):
 def stormCloud(L):
     result = L
     #! scale to control storm probability
-    scale = random.uniform(-0.05, 0)
+    scale = random.uniform(-0.06, 0)
     for y in range(len(L)):
         for x in range(len(L[0])):
             # regular

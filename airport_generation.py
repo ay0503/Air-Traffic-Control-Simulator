@@ -50,6 +50,7 @@ def newRwyPos(hdg, length):
     return pos
 
 # generates runway with a heading tangent to the circle with the center airport
+# will keep generating until reasonably distanced runways are created
 def generateRunway(airport):
     hdg = random.randrange(0, 360)
     length = 11000

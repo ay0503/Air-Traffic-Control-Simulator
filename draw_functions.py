@@ -39,6 +39,7 @@ def drawAirport(app, canvas):
         # draw runway
         canvas.create_line(rx, ry, rx + dx, ry - dy, fill = color, width = 3)
 
+# draws waypoints and names
 def drawWaypoints(app, canvas):
     for waypoint in app.airport.waypoints:
         cx, cy = waypoint.pos
@@ -132,6 +133,7 @@ def drawSidebarDetails(app, canvas):
             canvas.create_text(app.mapWidth + 3 * app.margin, y0 + (row + 1) * app.margin + (row + 0.5) * 20, 
                             text = f"{key.capitalize()}: {data}",  font = 'Arial 12 bold', anchor = 'w')
 
+# TODO beginner control panel
 def drawSidebarControls(app, canvas):
     base = 280 + 6 * app.margin + app.detailHeight
     r = 55

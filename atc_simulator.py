@@ -5,7 +5,6 @@ from airport_generation import *
 from commands import *
 from draw_functions import *
 from weather import winds, stormCloud, changeRange
-from perlin_noise import result
 import time, string
 
 #!!! IF THE GAME IS TOO SLOW, PRESS "X" TO DISABLE WEATHER VISUALIZATION
@@ -32,7 +31,6 @@ def appStarted(app):
     app.debug = False
     app.finished = set()
     app.pressure = noiseMap
-    app.image1 = Image.new(mode='RGB', size=(app.mapWidth, app.mapHeight))
     app.timerDelay = 1000
     app.index = 0
     app.timer = 0
@@ -49,13 +47,12 @@ def appStarted(app):
                             Runway('25R', [0, -11], 251, 12000, app.airport),
                             Runway('24L', [0, +6], 251, 12000, app.airport)] """
     # random generation
-    # TODO possibly make realism setting
     # TODO make size a difficulty setting
     app.airport = generateAirport([app.mapWidth / 2, app.mapHeight / 2])
     app.airport.create_waypoints(app.mapWidth, app.mapHeight)
     print("Size:", app.airport.size)
     # TODO implement storms as part of the weather object
-    app.airport.weather = Weather(app.airport, winds, stormCloud(changeRange(result)))
+    app.airport.weather = Weather(app.airport, winds, stormCloud(changeRange(noiseMap)))
     
     # flights
     app.flights = [createArrival(app.mapWidth, app.mapHeight, app.airport),

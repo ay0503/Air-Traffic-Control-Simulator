@@ -12,7 +12,6 @@ testFlights = [Flight('DAL123', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI
         Flight('KAL123', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI', 535),
         Flight('DAL3232', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI', 535),]
 
-
 # typo recgnition
 
 # returns dictionary of letter counts
@@ -24,6 +23,7 @@ def letterCounts(word):
 
 # returns True if typo is close enough to a word
 ## the dissimilarity index is calculated based on letter counts and substring search
+#! index: the dissimilarity index
 def closeEnough(typo, word, index):
     diff = 0
     typoData, wordData = letterCounts(typo), letterCounts(word)

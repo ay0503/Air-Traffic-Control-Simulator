@@ -276,6 +276,7 @@ class Arrival(Flight):
         super().__init__(callsign, type, pos, hdg, spd, alt, vs, start, end, fuel)
         self.fuel = fuel
         self.ILS = False
+        #! Landing probability
         self.ga = random.choice([True] * 1 + [False] * 6)
         self.landed = False
     

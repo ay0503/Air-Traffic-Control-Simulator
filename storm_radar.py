@@ -3,6 +3,8 @@ from cmu_112_graphics import *
 from perlin_noise import result
 from weather import stormCloud, changeRange
 
+#! STORM CLOUD VISUALIZER
+
 # draw storm cloud
 def appStarted(app):
     app.margin = 5
