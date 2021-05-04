@@ -30,7 +30,7 @@ def appStarted(app):
     app.pro = True
     app.score = 0
     app.debug = False
-    app.timerDelay = 500
+    app.timerDelay = 200
     app.index = 0
     app.timer = 0
     app.difficulty = 1
@@ -39,6 +39,7 @@ def appStarted(app):
     app.cause = None
     app.not_draw = False
     app.count = 0
+    app.paused = False
 
     # random generation
     app.airport = generateAirport([app.mapWidth / 2, app.mapHeight / 2])
@@ -54,8 +55,6 @@ def appStarted(app):
     app.selected = app.flights[0]
     app.sticks = 5
     app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
-
-    # threads
 
 def saveImage(app):
     for y in range(len(app.airport.storm)):
@@ -105,29 +104,34 @@ def keyPressed(app, event):
             app.debug = not app.debug
         elif event.key == "x":
             app.not_draw = not app.not_draw
+        elif event.key == "p":
+            app.paused = not app.paused
+        elif event.key == "r":
+            appStarted(app)
 
 def mousePressed(app, event):
-    # command input click
-    if 0 < event.x < app.mapWidth and app.mapHeight < event.y < app.height:
-        app.type = True
-    else:
-        app.type = False
-    # detect mouse click on plane for selection
-    if 0 < event.x < app.mapWidth and 0 < event.y < app.mapHeight:
-        for aircraft in app.flights:
-            if distance(aircraft.pos, (event.x, event.y)) < 20:
-                app.selected = aircraft
-                break
-            else: 
-                app.selected = None
-        for waypoint in app.airport.waypoints:
-            if distance(waypoint.pos, (event.x, event.y)) < 20:
-                app.selected_waypoint = waypoint
     # play again button detection
     if app.crash:
         if (app.mapWidth / 2 - 110 < event.x < app.mapWidth / 2 + 110 
             and app.mapHeight / 2 + 120 < event.y < app.mapHeight / 2 + 180):
             appStarted(app)
+    else:
+        # command input click
+        if 0 < event.x < app.mapWidth and app.mapHeight < event.y < app.height:
+            app.type = True
+        else:
+            app.type = False
+        # detect mouse click on plane for selection
+        if 0 < event.x < app.mapWidth and 0 < event.y < app.mapHeight:
+            for aircraft in app.flights:
+                if distance(aircraft.pos, (event.x, event.y)) < 20:
+                    app.selected = aircraft
+                    break
+                else: 
+                    app.selected = None
+            for waypoint in app.airport.waypoints:
+                if distance(waypoint.pos, (event.x, event.y)) < 20:
+                    app.selected_waypoint = waypoint
 
 # changes map size
 def sizeChanged(app):
@@ -140,7 +144,7 @@ def mouseDragged(app, event):
     app.draw.append((event.x, event.y))
 
 def timerFired(app):
-    if not app.crash:
+    if not (app.crash or app.paused):
         app.count += 1
         app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
         app.timer = (time.time() - app.startTime) // 2

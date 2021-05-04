@@ -52,7 +52,7 @@ def checkSafety(app):
             if fl1 != fl2:
                 d = distance(fl1.pos, fl2.pos)
                 altDiff = abs(fl1.alt - fl2.alt)
-                if d < 70 and altDiff < 500:
+                if d < 70 and altDiff < 500 and (fl1.alt and fl2.alt) > 500:
                     fl1.safe = fl2.safe = False
                     fl1.crash = fl2.crash = True
                     app.cause = "Proximity"
@@ -75,6 +75,9 @@ def vectorHdg(p1, p2):
     angle = -math.degrees(math.atan2(d[1], d[0]))
     hdg = 360 - ((angle + 270) % 360)
     return int(hdg)
+
+def hdgAngle(hdg):
+    return (360 - (hdg + 270) % 360) % 360
 
 # returns a 2d cartesian vector from a magnetic heading value
 def hdgVector(hdg, spd):
@@ -239,6 +242,11 @@ class Flight(object):
             self.hdg = req_hdg
             self.direct = None
         
+    def altitude_range(self):
+        time = 25 * (self.altCon - self.alt) / self.vs
+        distance = self.spd / 100 * time
+        return distance
+
 class Departure(Flight):
 
     def __init__(self, callsign, type, pos, hdg, spd, alt, vs, start, end, runway, fuel):
@@ -293,7 +301,9 @@ class Arrival(Flight):
         self.ILS = False
         #! Landing probability
         self.ga = random.choice([True] * 1 + [False] * 6)
+        #self.ga = True
         self.landed = False
+        self.ga_state = self.ga
     
     # aircraft checks for any ILS beacons
     def check_ILS(self, runways):
@@ -326,7 +336,6 @@ class Arrival(Flight):
             time = (distance(self.pos, runway.pos) - 5) / (self.spd / 100)
             self.vs = - int(self.spd * 4.8)
             self.gs_change_spd(140)
-        else: self.vs = 0
 
     # aircraft lands on runway if speed, altitude are 
     # appropriate and no go around is declared
@@ -336,12 +345,15 @@ class Arrival(Flight):
                 self.landed = True
             else: 
                 self.go_around()
+                self.ga = False
     
     # aircraft perform go around procedures
     def go_around(self):
+        self.alt = 120
+        self.vs = 2500
         self.change_alt(3500)
-        self.hdg = self.runway.hdg
         self.change_spd(210)
+        self.hdg = self.runway.hdg
         self.ILS = False
 
 class Aircraft(object):

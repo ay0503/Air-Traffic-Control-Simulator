@@ -26,9 +26,15 @@ def drawWarning(app, canvas):
     if app.cause != None:
         if int(app.count) % 2 == 0:
             color = "white"
-        else: color = "red"
+            rect_color = "red"
+        else: 
+            color = "red"
+            rect_color = "white"
+        canvas.create_rectangle(app.mapWidth / 2 - 150, app.mapHeight - 90, 
+                                app.mapWidth / 2 + 150, app.mapHeight - 50,
+                                fill = color)
         canvas.create_text(app.mapWidth / 2, app.mapHeight - 70, text = f"{app.cause} Warning",
-                            font = "Arial 35 bold", fill = color)
+                            font = "Arial 25 bold", fill = rect_color)
 
 # draws runways, ils vectors
 def drawAirport(app, canvas):
@@ -92,13 +98,19 @@ def drawAircraft(app, canvas, plane, color):
                         anchor = anchor, font = "Arial 8 bold", fill = 'white')
     # safety ring
     canvas.create_oval(x - r, y - r, x + r, y + r, outline = plane.color, dash = (1, 1), width = 2)
+    # altitude range
+    if plane.altCon != -100 and plane.vs != 0:
+        ar = plane.altitude_range()
+        canvas.create_arc(plane.pos[0] - ar, plane.pos[1] - ar, 
+                        plane.pos[0] + ar, plane.pos[1] + ar,
+                        style = ARC, start = hdgAngle(plane.hdg) - 30, 
+                        extent = 60, outline = app.color, width = 2.5)
     # basic drawing feature
-    #! takes way to much time to compute and draw
-    """ if app.selected == plane:
+    if app.selected == plane:
         for i in range(len(plane.path) - 1):
             x0, y0 = plane.path[i]
             x1, y1 = plane.path[i + 1]
-            canvas.create_line(x0, y0, x1, y1, fill = 'light green', width = 2) """
+            canvas.create_line(x0, y0, x1, y1, fill = 'light green', width = 2)
 
 def drawDeparture(app, canvas, plane):
     if not plane.sent:
