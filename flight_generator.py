@@ -11,10 +11,18 @@ def randNo(len):
     return random.randrange(10 ** (len - 1), 10 ** len)
 
 # generates new callsign for the flight
-def newCallsign():
-    airline = random.choice(list(airlines.keys()))
+def newCallsign(airport):
+    region = airport.code[0]
+    if airport.size in ["A", "B"]:
+        for airline in airlines:
+            for hub in airlineHubs[airline]:
+                if hub[0] == region:
+                    call = airline
+                    break
+    else:
+        call = random.choice(list(airlines.keys()))
     no = randNo(random.randrange(2,5))
-    callsign = f"{airline}{no}"
+    callsign = f"{call}{no}"
     return callsign
 
 # returns airline code from callsign
@@ -126,7 +134,7 @@ def newSquawkCode():
 # generates arrival with parameters generated above
 def createArrival(width, height, airport):
     pos = newPos(width, height)
-    callsign = newCallsign()
+    callsign = newCallsign(airport)
     type = newType(aircrafts, airport)
     code = callsignToAirline(callsign)
     fuel = newArrivalFuel(type.size)
@@ -138,7 +146,7 @@ def createArrival(width, height, airport):
 def createDeparture(airport):
     runway = random.choice(airport.runways)
     pos = copy.copy(runway.pos)
-    callsign = newCallsign()
+    callsign = newCallsign(airport)
     type = newType(aircrafts, airport)
     fuel = newDepartureFuel(type.size)
     start, end = newDepartureRoute(airport)

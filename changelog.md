@@ -123,3 +123,13 @@ create arrival generator
 - created storm map based on noise map
 - implemented storm map to simulator as cell grid
 - implemented wind map to simulator as backend weather feature
+
+5/2/2021 - 5.2 hours
+- added storms to weather object part of the airport
+- changed safety rings to blink when "unsafe"
+- added same color effect to sidebar flight sticks
+- weather generation is now part of airport generation
+- added text explaining why game ended
+
+5/4/2021 - 4.3 hours
+- changed airports so local airports only have domestic departure airport generation

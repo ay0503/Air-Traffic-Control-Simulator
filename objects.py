@@ -5,6 +5,7 @@ import decimal, random, copy
 time = time.time()
 
 # helper functions
+imageScale = 5
 
 # returns pixel distance between two points
 def distance(a, b):
@@ -31,22 +32,30 @@ def checkLineDistance(beaconpos, runwaypos, pos, d = 20):
     return False
 
 # changes safety status of aircraft based on proximity and fuel limits
-def checkSafety(aircrafts):
+def checkSafety(app):
+    # TODO create storm proximity constraint
     #! BUG rechecks same aircraft and changes safety status
-    for fl1 in aircrafts:
+    for fl1 in app.flights:
+        if app.airport.storm[int(fl1.pos[1] // imageScale)][int(fl1.pos[0] // imageScale)] == "yellow3":
+            fl1.safe = False
+        elif app.airport.storm[int(fl1.pos[1] // imageScale)][int(fl1.pos[0] // imageScale)] == "firebrick1":
+            app.cause = "Storm"
+            fl1.crash = True
         if fl1.fuel / fl1.fuelRate < 5:
             fl1.crash = True
+            app.cause = "Fuel"
         elif fl1.fuel / fl1.fuelRate < 30:
             fl1.safe = False
-        for fl2 in aircrafts:
-            if fl1.pos != fl2.pos:
+        for fl2 in app.flights:
+            if fl1 != fl2:
                 d = distance(fl1.pos, fl2.pos)
                 altDiff = abs(fl1.alt - fl2.alt)
                 if d < 80 and altDiff < 1000:
                     fl1.safe = fl2.safe = False
-                elif d < 80 and altDiff < 500:
+                if d < 70 and altDiff < 500:
                     fl1.safe = fl2.safe = False
                     fl1.crash = fl2.crash = True
+                    app.cause = "Proximity"
                 else:
                     fl1.safe = fl2.safe = True
 
@@ -110,6 +119,7 @@ class Flight(object):
         self.end = end
         self.direct = None
         self.acc = 0
+        self.color = 'light green'
         self.bank = 0
         self.altCon = -100
         self.hdgCon = -100
@@ -331,7 +341,6 @@ class Arrival(Flight):
         self.hdg = self.runway.hdg
         self.change_spd(210)
         self.ILS = False
-        # TODO maybe create go around guidance
 
 class Aircraft(object):
     
@@ -341,7 +350,6 @@ class Aircraft(object):
         self.size = size
         self.freq = freq
 
-# TODO maybe add waypoints to ILS final
 class Waypoint(object):
 
     def __init__(self, name, pos):
@@ -359,11 +367,10 @@ class Airline(object):
 # TODO create weather based states
 class Airport(object):
 
-    def __init__(self, code, pos, runways, size, winds):
+    def __init__(self, code, pos, runways, size):
         self.pos = pos
         self.code = code
         self.runways = runways
-        self.winds = winds
         self.size =  self.traffic = size
         self.waypoints = []
 
@@ -404,7 +411,7 @@ class Runway(object):
         self.open = True
         if airport.size not in ["A", "B"]:
             if list(map(lambda x: x.open, airport.runways)).count(True) > 0:
-                self.wind = airport.winds[int(self.pos[1] // 20)][int(self.pos[0] // 20)]
+                self.wind = airport.weather.winds[int(self.pos[1] // 5)][int(self.pos[0] // 5)]
                 self.open = self.check_winds(airport.winds)
         else: self.open = True
         #print(list(map(lambda x: x.open, filter(lambda x: x.open == True, airport.runways))))
@@ -417,7 +424,7 @@ class Runway(object):
 
     # if wind heading and spd is greater than legal crosswind limits, the runway is closed
     def check_winds(self, winds):
-        x, y = int(self.pos[0] // 20), int(self.pos[1] // 20)
+        x, y = int(self.pos[0] // imageScale), int(self.pos[1] // imageScale)
         if ((abs(winds[y][x][0] - self.hdg) < 80 or abs(winds[y][x][0] - self.hdg + 180) % 360 < 80) and winds[y][x][1] < 10):
             return True
         return False
@@ -434,7 +441,7 @@ class Runway(object):
 class Weather(object):
 
     def __init__(self, airport, winds, storm):
-        airport.storm = self.storm = storm
+        airport.storm = storm
         self.stormLevel = random.randrange(0,3)
         self.winds = airport.winds = winds
         self.visibility = self.stormLevel

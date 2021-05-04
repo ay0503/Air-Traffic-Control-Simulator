@@ -8,11 +8,12 @@ def drawBackground(app, canvas):
     canvas.create_rectangle(0, 0, app.mapWidth, app.mapHeight, fill = 'black')
     increment = 200
     if not app.not_draw:
-        drawClouds(app, canvas)
+        #drawClouds(app, canvas)
+        canvas.create_image(app.mapWidth / 2, app.mapHeight / 2, image=ImageTk.PhotoImage(app.image))
     for dist in range(0, app.width, increment):
         canvas.create_oval(app.airport.pos[0] - dist, app.airport.pos[1] - dist,
                             app.airport.pos[0] + dist, app.airport.pos[1] + dist,
-                            outline = app.color, dash = (1, 1), width = 2)
+                            outline = app.color, dash = (1, 1), width = 2.5)
     if app.selected != None:
         canvas.create_text(app.mapWidth - 20, app.mapHeight - 20, anchor = 'e', 
                         text = f"{app.selected.callsign} - {app.selected.flt_no()}", 
@@ -78,10 +79,9 @@ def drawAircraft(app, canvas, plane, color):
     # aircraft information
     canvas.create_text(x + offset, y, text = info, 
                         anchor = anchor, font = "Arial 8 bold", fill = 'white')
-    if not plane.safe: color = 'red'
+    #if not plane.safe: color = 'red'
     # safety ring
-    # TODO sidebar aircraft stick turns red
-    canvas.create_oval(x - r, y - r, x + r, y + r, outline = color, dash = (1, 1), width = 2)
+    canvas.create_oval(x - r, y - r, x + r, y + r, outline = plane.color, dash = (1, 1), width = 2)
     # basic drawing feature
     if app.selected == plane:
         for i in range(len(plane.path) - 1):
@@ -91,11 +91,11 @@ def drawAircraft(app, canvas, plane, color):
 
 def drawDeparture(app, canvas, plane):
     if not plane.sent:
-        drawAircraft(app, canvas, plane, "MediumPurple2")
+        drawAircraft(app, canvas, plane, "white")
 
 def drawArrival(app, canvas, plane):
     if not plane.landed:
-        drawAircraft(app, canvas, plane, "light green")
+        drawAircraft(app, canvas, plane, "white")
 
 # draws sidebar with flight stick information
 def drawSidebar(app, canvas):
@@ -118,7 +118,6 @@ def drawSidebar(app, canvas):
         drawSidebarControls(app, canvas,)
     
 def drawSidebarDetails(app, canvas):
-    # TODO details pane
     if app.selected != None:
         x0, y0, x1, y1 = app.mapWidth + app.margin, 280 + 5 * app.margin, app.width - app.margin, 280 + app.detailHeight + 5 * app.margin
         canvas.create_rectangle(x0, y0, x1, y1, outline = 'black', width = 2, fill = app.color)
@@ -166,11 +165,13 @@ def drawSidebarFlights(app, canvas):
     if len(app.flights) > 0:
         for row in range(len(app.display)):
             flight = app.display[row]
+            color = "light green"
+            if not flight.safe: color = 'red'
             # object recognition not working on macOS 11.2.3 (slow calculation speed)
             info = f"{app.flights.index(flight) + 1}. {flight.callsign}, {flight.type.code}, {flight.hdg}°, {flight.spd}kt, \n{int(flight.alt)}ft,  {flight.vs}ft/m,  {flight.start} - {flight.end}"
             canvas.create_rectangle(app.mapWidth + app.margin, 30 + row * (50 + app.margin),
                                     app.width - app.margin, 30 + row * app.margin + (row + 1) * 50,
-                                    outline = 'black', width = 2, fill = 'light green')
+                                    outline = 'black', width = 2, fill = color)
             canvas.create_text(app.mapWidth + 3 * app.margin, 30 + row * app.margin + (row + 0.5) * 50,
                                 anchor = 'w', text = info, font = 'Arial 12 bold')
 
@@ -181,7 +182,7 @@ def drawCommandInput(app, canvas):
     canvas.create_rectangle(0, app.mapHeight, app.mapWidth, app.height, 
                             fill = 'gray', outline = app.color, width = 2)
     canvas.create_text(5, (app.mapHeight + app.height) / 2, anchor = 'w', 
-                        text = f"Command: {text}", font = 'Arial 12 bold')
+                        text = f"Command: {text} |", font = 'Arial 12 bold')
     # command cursor
     """ if int(ticker) % 2 == 0:
         canvas.create_line(lastLetter, app.mapHeight + 9, lastLetter, app.height - 9,
@@ -213,12 +214,14 @@ def drawGameOver(app, canvas):
     # text
     canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 + 150, text = "Play Again",
                         font = "Arial 30 bold", fill = 'black')    
-    canvas.create_text(app.mapWidth / 2, app.mapHeight / 2, text = "GAME OVER", 
+    canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 - 70, text = "GAME OVER", 
                         font = "Arial 45 bold", fill = app.color)
+    canvas.create_text(app.mapWidth / 2, app.mapHeight / 2, fill = app.color, font = "Arial 30 bold",
+                        text = f"Game Ended Because of {app.cause} violation")
     canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 + 70, text = f"Score: {app.score}", 
-                        font = "Arial 30 bold", fill = app.color)         
+                        font = "Arial 30 bold", fill = app.color)      
 
-def getCellBounds(app, row, col):
+""" def getCellBounds(app, row, col):
     gridWidth  = app.mapWidth
     gridHeight = app.mapHeight
     x0 = gridWidth * col / app.cols
@@ -232,4 +235,4 @@ def drawClouds(app, canvas):
         for col in range(len(app.airport.storm[0])):
             color = app.airport.storm[row][col]
             (x0, y0, x1, y1) = getCellBounds(app, row, col)
-            canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = color)
+            canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = color) """

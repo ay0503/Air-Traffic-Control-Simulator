@@ -3,8 +3,8 @@ from objects import *
 from flight_generator import *
 from airport_generation import *
 from commands import *
+from perlin_noise import imageScale
 from draw_functions import *
-from weather import winds, stormCloud, changeRange
 import time, string
 
 #!!! IF THE GAME IS TOO SLOW, PRESS "X" TO DISABLE WEATHER VISUALIZATION
@@ -30,37 +30,45 @@ def appStarted(app):
     app.pro = True
     app.score = 0
     app.debug = False
-    app.finished = set()
-    app.pressure = noiseMap
-    app.timerDelay = 1000
+    app.timerDelay = 500
     app.index = 0
     app.timer = 0
+    app.difficulty = 2
     app.rows = app.mapHeight // 10
     app.cols = app.mapWidth // 10
     app.cause = None
     app.not_draw = False
+    app.count = 0
 
-    #* FUTURE GAMEMODES: Real World Data, Random Generated Data, Maybe? Custom building
-    # pre generation
-    """ app.airport = Airport("KLAX", [app.mapWidth / 2, app.mapHeight / 2], [], 'F')
-    app.airport.runways += [Runway('25L', [0, -6], 251, 12000, app.airport), 
-                            Runway('24R', [0, +11], 251, 12000, app.airport),
-                            Runway('25R', [0, -11], 251, 12000, app.airport),
-                            Runway('24L', [0, +6], 251, 12000, app.airport)] """
     # random generation
-    # TODO make size a difficulty setting
     app.airport = generateAirport([app.mapWidth / 2, app.mapHeight / 2])
     app.airport.create_waypoints(app.mapWidth, app.mapHeight)
-    print("Size:", app.airport.size)
-    # TODO implement storms as part of the weather object
-    app.airport.weather = Weather(app.airport, winds, stormCloud(changeRange(noiseMap)))
+    app.image = Image.new(mode='RGB', size=(len(app.airport.storm[0]), len(app.airport.storm)))
+    saveImage(app)
     
     # flights
     app.flights = [createArrival(app.mapWidth, app.mapHeight, app.airport),
                     createDeparture(app.airport)]
+    for i in range(app.difficulty):
+        app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
     app.selected = app.flights[0]
     app.sticks = 5
     app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
+
+def saveImage(app):
+    for y in range(len(app.airport.storm)):
+        for x in range(len(app.airport.storm[0])):
+            r, g, b = 0, 0, 0
+            if app.airport.storm[y][x] == "black":
+                r, g, b = 0, 0, 0
+            elif app.airport.storm[y][x] == "green3":
+                r, g, b, = 10, 155, 10
+            elif app.airport.storm[y][x] == "yellow3":
+                r, g, b = 205, 205, 0
+            elif app.airport.storm[y][x] == "firebrick1":
+                r, g, b = 255, 48, 48
+            app.image.putpixel((x,y),(r, g, b))
+    app.image = app.scaleImage(app.image, imageScale)
 
 def keyPressed(app, event):
     if app.type:
@@ -112,7 +120,6 @@ def mousePressed(app, event):
     if app.crash:
         if (app.mapWidth / 2 - 110 < event.x < app.mapWidth / 2 + 110 
             and app.mapHeight / 2 + 120 < event.y < app.mapHeight / 2 + 180):
-            app.clickColor = 'green'
             appStarted(app)
 
 # changes map size
@@ -126,28 +133,35 @@ def mouseDragged(app, event):
     app.draw.append((event.x, event.y))
 
 def timerFired(app):
+    app.count += 1
     """ print(list(map(lambda x: x.callsign, app.flights)))
     print(list(map(lambda x: x.callsign, app.display))) """
     app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
-    app.timer = (time.time() - app.startTime)
+    app.timer = (time.time() - app.startTime) // 2
     # moves aircraft, checks for crashes and constraint violations
     for flight in app.flights:
+        if not flight.safe:
+            if int(app.count) % 2 == 0:
+                flight.color = "light green"
+            else: flight.color = "red"
         if flight.crash:
             app.crash = True
         flight.check_constraints()
         flight.move()
         if type(flight) == Arrival:
             flight.check_ILS(app.airport.runways)
-            if flight.landed and flight not in app.finished:
+            if flight.landed:
                 app.score += 10
-                app.finished.add(flight)
+                app.display.remove(flight)
+                app.flights.remove(flight)
         elif type(flight) == Departure:
-            if flight.sent and flight not in app.finished:
+            if flight.sent:
                 app.score += 5
-                app.finished.add(flight)
-    checkSafety(app.flights)
-    # create arrivals every 30 seconds
-    if int(app.timer % 120) == 0 and int(app.timer) > 0 and len(app.flights) < 6:
+                app.display.remove(flight)
+                app.flights.remove(flight)
+    checkSafety(app)
+    # create arrivals every 120 seconds
+    if int(app.count % 120) == 0 and int(app.count) > 0 and len(app.flights) < 6:
         app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
         if not flight.check_on_grid(app.mapWidth, app.mapHeight):
             app.flights.remove(flight)

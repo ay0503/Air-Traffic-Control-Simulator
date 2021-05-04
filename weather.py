@@ -69,13 +69,13 @@ def changeRange(L):
 
 # returns color map of weather map
 def stormCloud(L):
-    result = L
+    result = copy.deepcopy(L)
     #! scale to control storm probability
-    scale = random.uniform(-0.06, 0)
+    scale = random.uniform(-0.09, 0)
     for y in range(len(L)):
         for x in range(len(L[0])):
             # regular
-            a, b, c, d = -1.1, -1.03, -1, -0.93
+            a, b, c, d = -1.12, -1.05, -1.02, -0.98
             if a <= L[y][x] + scale <= b:
                 result[y][x] = "firebrick1"
             elif b < L[y][x] + scale <= c:
@@ -96,5 +96,6 @@ def removeZeros(L):
 noiseMap = result
 #print2dList(noiseMap)
 winds = wind(changeRange(noiseMap))
+storm = stormCloud(changeRange(noiseMap))
 
 #print(stormCloud(noiseMap))

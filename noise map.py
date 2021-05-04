@@ -12,10 +12,10 @@ def appStarted(app):
     pic = result
     for x in range(app.image1.width):
         for y in range(app.image1.height):
-            val = int(pic[y // 10][x // 10] * 255)
+            val = int(pic[y // 5][x // 5] * 255)
             app.image1.putpixel((x,y),(val,val,val))
 
 def redrawAll(app, canvas):
     canvas.create_image(app.width / 2, app.height / 2, image=ImageTk.PhotoImage(app.image1))
 
-#runApp(width = len(result[0] * 10), height = len(result) * 10)
+#runApp(width = len(result[0]) * 5, height = len(result) * 5)

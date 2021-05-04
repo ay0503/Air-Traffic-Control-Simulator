@@ -2,12 +2,11 @@ from objects import *
 from airport_data import airports
 from aircraft_data import  aircrafts
 from airline_data import airlines
-from pprint import pprint
-from weather import winds
+from weather import winds, storm
 import string, random
 
 # continent codes https://en.wikipedia.org/wiki/ICAO_airport_code#/media/File:ICAO_FirstLetter.svg
-continentCodes = ["K", "C", "S", "U", "Z", "R", "Y", "V", "B", "O", "E", "L"]
+continentCodes = ["K", "C", "S", "U", "Z", "R", "Y", "V", "O", "E", "L"]
 letters = list(string.ascii_uppercase)
 sizes = ["A", "B", "C", "D", "E", "F"]
 
@@ -16,7 +15,7 @@ sizes = ["A", "B", "C", "D", "E", "F"]
 #* average international - E, major international - F
 
 # airport parameters
-def generateCode():
+def generateCode(size):
     code = random.choice(continentCodes)
     for count in range(3):
         code += random.choice(letters)
@@ -72,12 +71,12 @@ def generateWind(runways):
 
 # generates airport object with parameters generated above
 def generateAirport(pos):
-    code = generateCode()
     size = generateSize(sizes)
+    code = generateCode(size)
     runways = []
-    airport = Airport(code, pos, runways, size, winds)
+    airport = Airport(code, pos, runways, size)
+    airport.weather = Weather(airport, winds, storm)
+    airport.wind = airport.weather.winds[int(pos[1] // 20)][int(pos[0] // 20)]
     for count in range(runwayCount(airport.size)):
         airport.runways.append(generateRunway(airport))
-        #pprint(f"Runway: {vars(airport.runways[count])}")
-    airport.wind = generateWind(runways)
     return airport

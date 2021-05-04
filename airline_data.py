@@ -7,10 +7,14 @@ JAL, Japan Air, RJTT, RJAA
 BAW, British Airways, EGLL, EGKK
 SWA, Southwest, KLAS, KATL, KBWI, KMDW, KDEN, KLAX
 UAL, United, KIAD, KJFK
-AFL, Air France, LFPO, LFPG
+AFR, Air France, LFPO, LFPG
+AFL, Aeroflot, UUEE
 DLH, Lufthansa, EDDF, EDDM
+ACA, Air Canada, CYVR, CYYC
 AAR, Asiana, RKSI, RKSS
 CAL, China Airlines, RCTP
+CCA, Air China, ZBAA, ZBAD, ZSPD, ZUUU
+TAM, LATAM Brazil, SBGR, SBAR
 CPA, Cathay Pacific, VHHH
 UAE, Emirates, OMDB
 FDX, Fedex, KMIA, KDFW, KMEM

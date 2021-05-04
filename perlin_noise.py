@@ -1,4 +1,5 @@
 import random, copy
+from objects import distance
 
 def minAndMax(L):
     right, left = -1, 1
@@ -82,22 +83,24 @@ def noise(x, y, scale):
 # TODO scale parameter in storm object
 # returns 2D list of noise with octave, persistance, lacunarity parameters
 def octave(result, per, lac, octaves, level):
+    width, height = len(result[0]), len(result)
     #! random eccentricity for elliptic base
     a = random.uniform(0.5, 2)
     #! position of cloud center
     dx, dy = random.random(), random.random()
-    for y in range(len(result)):
-        for x in range(len(result[0])):
+    for y in range(height):
+        for x in range(width):
             amp = 10
             freq = 0.1
             noiseH = 0
             for i in range(octaves):
-                noiseH += (2 * noise(x * freq, y * freq, 1) + 1) * f(x, y, len(result[0]), 
-                            len(result), dx, dy, a, level)
+                noiseH += (2 * noise(x * freq, y * freq, 1) + 1) * f(x, y, width, 
+                            height, dx, dy, a, level)
                 amp *= per
                 freq *= lac
             result[y][x] = float("{:.2f}".format(noiseH))
     return result
 
-width, height = 166, 102
-result = octave([[0] * (width) for y in range(height)], 0.4, 1, 2, random.randint(1,20))
+imageScale = 5
+width, height = 1660 // imageScale, 1020 // imageScale
+result = octave([[0] * (width) for y in range(height)], 0.4, 1, 2, random.randint(10,20))
