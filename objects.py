@@ -34,30 +34,35 @@ def checkLineDistance(beaconpos, runwaypos, pos, d = 20):
 # changes safety status of aircraft based on proximity and fuel limits
 def checkSafety(app):
     # TODO create storm proximity constraint
-    #! BUG rechecks same aircraft and changes safety status
     for fl1 in app.flights:
-        if app.airport.storm[int(fl1.pos[1] // imageScale)][int(fl1.pos[0] // imageScale)] == "yellow3":
+        #print(int(fl1.pos[1] // imageScale - 1), int(fl1.pos[0] // imageScale - 1))
+        """ if app.airport.storm[int(fl1.pos[1] // imageScale)][int(fl1.pos[0] // imageScale)] == "yellow3":
             fl1.safe = False
         elif app.airport.storm[int(fl1.pos[1] // imageScale)][int(fl1.pos[0] // imageScale)] == "firebrick1":
             app.cause = "Storm"
-            fl1.crash = True
+            fl1.crash = True """
         if fl1.fuel / fl1.fuelRate < 5:
             fl1.crash = True
             app.cause = "Fuel"
         elif fl1.fuel / fl1.fuelRate < 30:
             fl1.safe = False
+            app.cause = "Fuel"
+            break
         for fl2 in app.flights:
             if fl1 != fl2:
                 d = distance(fl1.pos, fl2.pos)
                 altDiff = abs(fl1.alt - fl2.alt)
-                if d < 80 and altDiff < 1000:
-                    fl1.safe = fl2.safe = False
                 if d < 70 and altDiff < 500:
                     fl1.safe = fl2.safe = False
                     fl1.crash = fl2.crash = True
                     app.cause = "Proximity"
+                if d < 80 and altDiff < 1500:
+                    fl1.safe = fl2.safe = False
+                    app.cause = "Proximity"
+                    break
                 else:
                     fl1.safe = fl2.safe = True
+                    app.cause = None
 
 # returns a heading from a 2d cartesian vector
 def vectorHdg(p1, p2):

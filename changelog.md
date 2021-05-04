@@ -137,3 +137,5 @@ create arrival generator
 - added vspeeds feature for aircraft type
 - added runway length based on airport size
 - entering severe storms now crash the plane with some probability
+- added blinking warnings for proximity and fuel
+- changed command input to string based input

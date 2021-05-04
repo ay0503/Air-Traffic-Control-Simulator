@@ -6,9 +6,8 @@ from commands import *
 from perlin_noise import imageScale
 from draw_functions import *
 import time, string
-import threading
+import concurrent.futures
 
-#!!! IF THE GAME IS TOO SLOW, PRESS "X" TO DISABLE WEATHER VISUALIZATION
 #!!! BUG ON MACOS WHERE AIRCRAFT SPAWNS UNDER COMMMAND PROMPT (not on Windows)
 
 def appStarted(app):
@@ -17,7 +16,6 @@ def appStarted(app):
     app.color = "white"
     app.sidebarWidth = 260
     app.mapWidth, app.mapHeight = app.width - app.sidebarWidth, app.height - 60
-    app.input = []
     app.command = ""
     app.detailHeight = 240
     app.controlHeight = 460
@@ -35,7 +33,7 @@ def appStarted(app):
     app.timerDelay = 500
     app.index = 0
     app.timer = 0
-    app.difficulty = 2
+    app.difficulty = 1
     app.rows = app.mapHeight // 10
     app.cols = app.mapWidth // 10
     app.cause = None
@@ -74,29 +72,46 @@ def saveImage(app):
             app.image.putpixel((x,y),(r, g, b))
     app.image = app.scaleImage(app.image, imageScale)
 
+def commandControl(app, event):
+    if event.key in string.printable:
+        app.command += event.key
+    elif event.key == "Space":
+        app.command += (" ")
+    elif event.key in ["Backspace", "Delete"]:
+        app.command = app.command[:-1]
+    elif event.key == "Enter":
+        print("Command:", app.command)
+        if debugCommand(app.command):
+            debugExecuteCommand(app.flights, app.airport, app.command)
+        else: executeCommand(app.flights, app.airport, app.command)
+        app.command = ""
+
 def keyPressed(app, event):
     if app.type:
         commandControl(app, event)
-    if event.key == "Up":
-        if app.display != app.flights[:app.sticks]:
-            app.index -= 1
-            app.display = app.flights[app.index:app.index + app.sticks]
-    elif event.key == "Down":
-        if app.display != app.flights[len(app.flights) - app.sticks:]:
-            app.index += 1
-            app.display = app.flights[app.index:app.index + app.sticks]
-    elif event.key == "+":
-        app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
-        app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
-    elif event.key == "y":
-        app.debug = not app.debug
-    elif event.key == "x":
-        app.not_draw = not app.not_draw
+    else:
+        if event.key == "Up":
+            if app.display != app.flights[:app.sticks]:
+                app.index -= 1
+                app.display = app.flights[app.index:app.index + app.sticks]
+        elif event.key == "Down":
+            if app.display != app.flights[len(app.flights) - app.sticks:]:
+                app.index += 1
+                app.display = app.flights[app.index:app.index + app.sticks]
+        elif event.key == "+":
+            app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
+            app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
+        elif event.key == "y":
+            app.debug = not app.debug
+        elif event.key == "x":
+            app.not_draw = not app.not_draw
 
 def mousePressed(app, event):
     # command input click
     if 0 < event.x < app.mapWidth and app.mapHeight < event.y < app.height:
         app.type = True
+    else:
+        app.type = False
     # detect mouse click on plane for selection
     if 0 < event.x < app.mapWidth and 0 < event.y < app.mapHeight:
         for aircraft in app.flights:
@@ -124,24 +139,8 @@ def mouseDragged(app, event):
         app.selected.pos = [event.x, event.y]
     app.draw.append((event.x, event.y))
 
-def commandControl(app, event):
-    if event.key in string.printable:
-        app.input.append(event.key)
-    elif event.key == "Space":
-        app.input.append(" ")
-    elif event.key in ["Backspace", "Delete"]:
-        app.input = app.input[:-1]
-    elif event.key == "Enter":
-        app.command = "".join(app.input)
-        print("Command:", app.command)
-        if debugCommand(app.command):
-            debugExecuteCommand(app.flights, app.airport, app.command)
-        else: executeCommand(app.flights, app.airport, app.command)
-        app.input = []
-
 def timerFired(app):
     if not app.crash:
-        threads = []
         app.count += 1
         app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
         app.timer = (time.time() - app.startTime) // 2
@@ -151,10 +150,12 @@ def timerFired(app):
                 if int(app.count) % 2 == 0:
                     flight.color = "light green"
                 else: flight.color = "red"
+            else: flight.color = "light green"
             if flight.crash:
                 app.crash = True
             flight.check_constraints()
             flight.move()
+            checkSafety(app)
             if type(flight) == Arrival:
                 flight.check_ILS(app.airport.runways)
                 if flight.landed:
@@ -166,7 +167,6 @@ def timerFired(app):
                     app.score += 5
                     app.display.remove(flight)
                     app.flights.remove(flight)
-        checkSafety(app)
         # create arrivals every 120 seconds
         if int(app.count % 120) == 0 and int(app.count) > 0 and len(app.flights) < 6:
             app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
@@ -182,6 +182,7 @@ def redrawAll(app, canvas):
             drawDeparture(app, canvas, flight)
         else: drawArrival(app, canvas, flight)
     drawWaypoints(app, canvas)
+    drawWarning(app, canvas)
     drawSidebar(app, canvas)
     drawWind(app, canvas)
     if app.crash:

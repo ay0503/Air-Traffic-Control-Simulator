@@ -1,6 +1,7 @@
 from cmu_112_graphics import *
 from objects import *
 from weather import noiseMap
+import threading
 from storm_radar import drawClouds
 
 # draws weather, range rings (200nm)
@@ -8,8 +9,7 @@ def drawBackground(app, canvas):
     canvas.create_rectangle(0, 0, app.mapWidth, app.mapHeight, fill = 'black')
     increment = 200
     if not app.not_draw:
-        #drawClouds(app, canvas)
-        canvas.create_image(app.mapWidth / 2, app.mapHeight / 2, image=ImageTk.PhotoImage(app.image))
+        drawClouds(app, canvas)
     for dist in range(0, app.width, increment):
         canvas.create_oval(app.airport.pos[0] - dist, app.airport.pos[1] - dist,
                             app.airport.pos[0] + dist, app.airport.pos[1] + dist,
@@ -18,6 +18,17 @@ def drawBackground(app, canvas):
         canvas.create_text(app.mapWidth - 20, app.mapHeight - 20, anchor = 'e', 
                         text = f"{app.selected.callsign} - {app.selected.flt_no()}", 
                         font = "Arial 14 bold", fill = app.color)
+
+def drawClouds(app, canvas):
+    canvas.create_image(app.mapWidth / 2, app.mapHeight / 2, image=ImageTk.PhotoImage(app.image))
+
+def drawWarning(app, canvas):
+    if app.cause != None:
+        if int(app.count) % 2 == 0:
+            color = "white"
+        else: color = "red"
+        canvas.create_text(app.mapWidth / 2, app.mapHeight - 70, text = f"{app.cause} Warning",
+                            font = "Arial 35 bold", fill = color)
 
 # draws runways, ils vectors
 def drawAirport(app, canvas):
@@ -166,8 +177,11 @@ def drawSidebarFlights(app, canvas):
     if len(app.flights) > 0:
         for row in range(len(app.display)):
             flight = app.display[row]
-            color = "light green"
-            if not flight.safe: color = 'red'
+            if not flight.safe:
+                if int(app.count) % 2 == 0:
+                    color = "light green"
+                else: color = "red"
+            else: color = "light green"
             # object recognition not working on macOS 11.2.3 (slow calculation speed)
             info = f"{app.flights.index(flight) + 1}. {flight.callsign}, {flight.type.code}, {flight.hdg}°, {flight.spd}kt, \n{int(flight.alt)}ft,  {flight.vs}ft/m,  {flight.start} - {flight.end}"
             canvas.create_rectangle(app.mapWidth + app.margin, 30 + row * (50 + app.margin),
@@ -178,7 +192,7 @@ def drawSidebarFlights(app, canvas):
 
 # draws command prompt at the bottom of the screen
 def drawCommandInput(app, canvas):
-    text = "".join(app.input)
+    text = app.command
     lastLetter = 9 * len(text) + 95
     canvas.create_rectangle(0, app.mapHeight, app.mapWidth, app.height, 
                             fill = 'gray', outline = app.color, width = 2)
