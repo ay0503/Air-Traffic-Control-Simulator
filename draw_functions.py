@@ -79,15 +79,15 @@ def drawAircraft(app, canvas, plane, color):
     # aircraft information
     canvas.create_text(x + offset, y, text = info, 
                         anchor = anchor, font = "Arial 8 bold", fill = 'white')
-    #if not plane.safe: color = 'red'
     # safety ring
     canvas.create_oval(x - r, y - r, x + r, y + r, outline = plane.color, dash = (1, 1), width = 2)
     # basic drawing feature
-    if app.selected == plane:
+    #! takes way to much time to compute and draw
+    """ if app.selected == plane:
         for i in range(len(plane.path) - 1):
             x0, y0 = plane.path[i]
             x1, y1 = plane.path[i + 1]
-            canvas.create_line(x0, y0, x1, y1, fill = 'light green', width = 2)
+            canvas.create_line(x0, y0, x1, y1, fill = 'light green', width = 2) """
 
 def drawDeparture(app, canvas, plane):
     if not plane.sent:
@@ -115,7 +115,8 @@ def drawSidebar(app, canvas):
     drawSidebarFlights(app, canvas)
     drawSidebarDetails(app, canvas)
     if not app.pro:
-        drawSidebarControls(app, canvas,)
+        #drawSidebarControls(app, canvas,)
+        pass
     
 def drawSidebarDetails(app, canvas):
     if app.selected != None:
@@ -133,7 +134,7 @@ def drawSidebarDetails(app, canvas):
                             text = f"{key.capitalize()}: {data}",  font = 'Arial 12 bold', anchor = 'w')
 
 # TODO beginner control panel
-def drawSidebarControls(app, canvas):
+""" def drawSidebarControls(app, canvas):
     base = 280 + 6 * app.margin + app.detailHeight
     r = 55
     x0, y0, x1, y1 = app.mapWidth + app.margin, base, app.width - app.margin, base + app.controlHeight
@@ -158,7 +159,7 @@ def drawSidebarControls(app, canvas):
                         y0 + app.margin + 5 * r, outline = 'black', width = 2, fill = app.color)
     if app.selected_waypoint != None:
         canvas.create_text(x1 - app.margin - r, y0 + app.margin + 4.5 * r, 
-                        text = f"{app.selected_waypoint.name}" , font = 'Arial 12 bold')
+                        text = f"{app.selected_waypoint.name}" , font = 'Arial 12 bold') """
 
 def drawSidebarFlights(app, canvas):
     # draw flight sticks
@@ -183,10 +184,6 @@ def drawCommandInput(app, canvas):
                             fill = 'gray', outline = app.color, width = 2)
     canvas.create_text(5, (app.mapHeight + app.height) / 2, anchor = 'w', 
                         text = f"Command: {text} |", font = 'Arial 12 bold')
-    # command cursor
-    """ if int(ticker) % 2 == 0:
-        canvas.create_line(lastLetter, app.mapHeight + 9, lastLetter, app.height - 9,
-                        width = 3) """
 
 # wind circle direction indicator
 def drawWind(app, canvas):
@@ -220,19 +217,3 @@ def drawGameOver(app, canvas):
                         text = f"Game Ended Because of {app.cause} violation")
     canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 + 70, text = f"Score: {app.score}", 
                         font = "Arial 30 bold", fill = app.color)      
-
-""" def getCellBounds(app, row, col):
-    gridWidth  = app.mapWidth
-    gridHeight = app.mapHeight
-    x0 = gridWidth * col / app.cols
-    x1 = gridWidth * (col + 1) / app.cols
-    y0 = gridHeight * row / app.rows
-    y1 = gridHeight * (row + 1) / app.rows
-    return (x0, y0, x1, y1)
-
-def drawClouds(app, canvas):
-    for row in range(len(app.airport.storm)):
-        for col in range(len(app.airport.storm[0])):
-            color = app.airport.storm[row][col]
-            (x0, y0, x1, y1) = getCellBounds(app, row, col)
-            canvas.create_rectangle(x0, y0, x1, y1, fill = color, outline = color) """

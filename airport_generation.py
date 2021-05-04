@@ -33,14 +33,14 @@ def runwayCount(size):
     return mass
 
 # varying runway length by airport size
-""" def newLength(airport):
+def newLength(airport):
     if ord(airport.size) < ord("B"):
-        return random.randrange(500, 2000)
+        return random.randrange(1200, 2000)
     elif ord(airport.size) < ord("C"):
         return random.randrange(3000, 5000)
     else: 
         diff = ord(airport.size) - ord("A")
-        return random.randrange(6000 + diff * 1000, 7000 + diff * 1000) """
+        return random.randrange(6000 + diff * 1000, 7000 + diff * 1000)
 
 # generates runway position based on radius vector from airport position
 def newRwyPos(hdg, length):
@@ -52,7 +52,7 @@ def newRwyPos(hdg, length):
 # will keep generating until reasonably distanced runways are created
 def generateRunway(airport):
     hdg = random.randrange(0, 360)
-    length = 11000
+    length = newLength(airport)
     pos = newRwyPos(hdg, length)
     for runway in airport.runways:
         while distance(pos, runway.pos) < 15 and abs(hdg - runway.hdg) < 20:

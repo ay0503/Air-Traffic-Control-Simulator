@@ -133,3 +133,7 @@ create arrival generator
 
 5/4/2021 - 4.3 hours
 - changed airports so local airports only have domestic departure airport generation
+- local and regional airports only have domestic airlines
+- added vspeeds feature for aircraft type
+- added runway length based on airport size
+- entering severe storms now crash the plane with some probability

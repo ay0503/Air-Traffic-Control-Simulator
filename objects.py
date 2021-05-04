@@ -270,7 +270,7 @@ class Departure(Flight):
     # TODO replace with vspeed 
     # aircraft takesoff (accelerates to speed when it will increase in altitude)
     def takeoff(self):
-        if self.spd < 145:
+        if self.spd < self.type.vspeed:
             self.acc = 5
         else:
             self.vs = 3000
@@ -297,9 +297,6 @@ class Arrival(Flight):
             if checkLineDistance(runway.beacon, runway.pos, self.pos) and abs(self.hdg - runway.hdg) < 40:
                 self.ILS = True
                 self.runway = runway
-                """ diff = self.runway.wind[1] - 10
-                if diff > 0:
-                    self.ga = random.choice([True] * (5 + diff) + [False] * 5) """
                 self.intercept_ILS(runway)
                 self.direct = runway
             if self.ILS:
@@ -349,6 +346,9 @@ class Aircraft(object):
         self.code = code
         self.size = size
         self.freq = freq
+        if self.size == "A":
+            self.vspeed = 60
+        else: self.vspeed = (ord(self.size) - ord("A")) * 10 + 100
 
 class Waypoint(object):
 
@@ -418,8 +418,8 @@ class Runway(object):
         self.num = roundHalfUp(hdg / 10)
         self.length = length
         self.plength = self.length / 400
-        self.beacon = [self.pos[0] - hdgVector(self.hdg, 10 * self.plength)[0], 
-                        self.pos[1] + hdgVector(self.hdg, 10 * self.plength)[1]]
+        self.beacon = [self.pos[0] - hdgVector(self.hdg, 275)[0], 
+                        self.pos[1] + hdgVector(self.hdg, 275)[1]]
         #self.wind = airport.winds[self.pos[1] // 20, self.pos[0] // 20]
 
     # if wind heading and spd is greater than legal crosswind limits, the runway is closed
