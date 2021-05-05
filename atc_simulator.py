@@ -3,12 +3,14 @@ from objects import *
 from flight_generator import *
 from airport_generation import *
 from commands import *
-from perlin_noise import imageScale
+from perlin_noise import imageScale, octave
+from weather import wind, stormCloud, changeRange
 from draw_functions import *
 import time, string
-import concurrent.futures
 
 #!!! BUG ON MACOS WHERE AIRCRAFT SPAWNS UNDER COMMMAND PROMPT (not on Windows)
+# TODO START SCREEN
+
 
 def appStarted(app):
 
@@ -20,30 +22,38 @@ def appStarted(app):
     app.detailHeight = 240
     app.controlHeight = 460
     app.margin = 5
+    app.pauseColor = "white"
+    app.onexColor = "white"
+    app.fourxColor = "white"
+    app.startColor = "white"
     
     # app states
     app.crash = False
     app.selected_waypoint = None
     app.startTime = time.time()
     app.type = False
-    app.draw = []
-    app.pro = True
+    app.pro = False
     app.score = 0
     app.debug = False
     app.timerDelay = 200
     app.index = 0
     app.timer = 0
-    app.difficulty = 1
+    app.difficulty = 0
     app.rows = app.mapHeight // 10
     app.cols = app.mapWidth // 10
     app.cause = None
     app.not_draw = False
     app.count = 0
+    app.start = False
     app.paused = False
+
+    # weather
+    app.imageScale = 5
 
     # random generation
     app.airport = generateAirport([app.mapWidth / 2, app.mapHeight / 2])
     app.airport.create_waypoints(app.mapWidth, app.mapHeight)
+    newWeather(app)
     app.image = Image.new(mode='RGB', size=(len(app.airport.storm[0]), len(app.airport.storm)))
     saveImage(app)
     
@@ -55,6 +65,14 @@ def appStarted(app):
     app.selected = app.flights[0]
     app.sticks = 5
     app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
+
+def newWeather(app):
+    imageScale = 5
+    width, height = 1660 // imageScale, 1020 // imageScale
+    result = octave([[0] * (width) for y in range(height)], 0.4, 1, 2, random.randint(10,20))
+    winds = wind(changeRange(result))
+    storm = stormCloud(changeRange(result))
+    app.airport.weather = Weather(app.airport, winds, storm)
 
 def saveImage(app):
     for y in range(len(app.airport.storm)):
@@ -111,27 +129,59 @@ def keyPressed(app, event):
 
 def mousePressed(app, event):
     # play again button detection
-    if app.crash:
-        if (app.mapWidth / 2 - 110 < event.x < app.mapWidth / 2 + 110 
-            and app.mapHeight / 2 + 120 < event.y < app.mapHeight / 2 + 180):
-            appStarted(app)
-    else:
-        # command input click
-        if 0 < event.x < app.mapWidth and app.mapHeight < event.y < app.height:
-            app.type = True
+    if app.start:
+        if app.crash:
+            if (app.mapWidth / 2 - 110 < event.x < app.mapWidth / 2 + 110 
+                and app.mapHeight / 2 + 120 < event.y < app.mapHeight / 2 + 180):
+                appStarted(app)
         else:
-            app.type = False
-        # detect mouse click on plane for selection
-        if 0 < event.x < app.mapWidth and 0 < event.y < app.mapHeight:
-            for aircraft in app.flights:
-                if distance(aircraft.pos, (event.x, event.y)) < 20:
-                    app.selected = aircraft
-                    break
-                else: 
-                    app.selected = None
-            for waypoint in app.airport.waypoints:
-                if distance(waypoint.pos, (event.x, event.y)) < 20:
-                    app.selected_waypoint = waypoint
+            # command input click
+            if 0 < event.x < app.mapWidth and app.mapHeight < event.y < app.height:
+                app.type = True
+            else:
+                app.type = False
+            # detect mouse click on plane for selection
+            if 0 < event.x < app.mapWidth and 0 < event.y < app.mapHeight:
+                for aircraft in app.flights:
+                    if distance(aircraft.pos, (event.x, event.y)) < 20:
+                        app.selected = aircraft
+                        break
+                    else: 
+                        app.selected = None
+                for waypoint in app.airport.waypoints:
+                    if distance(waypoint.pos, (event.x, event.y)) < 20:
+                        app.selected_waypoint = waypoint
+    base = 280 + 6 * app.margin + app.detailHeight
+    r = 55
+    x0, y0, x1, y1 = app.mapWidth + app.margin, base, app.width - app.margin, base + app.controlHeight
+    if (x0 + app.margin < event.x < x0 + app.margin + 2 * r and 
+        y0 + app.margin + 2.5 * r < event.y < y0 + app.margin + 3.5 * r):
+        app.start = True
+        app.startColor = "light green"
+    elif (x1 - app.margin - 2 * r < event.x < x1 - app.margin and 
+        y0 + app.margin + 2.5 * r < event.y < y0 + app.margin + 3.5 * r):
+        app.paused = not app.paused
+        if app.paused:
+            app.pauseColor = "light green"
+        else: app.pauseColor = "white"
+    elif (x0 + app.margin < event.x < x0 + app.margin + 2 * r and
+        y0 + app.margin + 4 * r < event.y < y0 + app.margin + 5 * r):
+        if app.timerDelay != 1000:
+            app.timerDelay = 1000
+            app.onexColor = "light green"
+            app.fourxColor = "white"
+        else:
+            app.timerDelay = 500
+            app.onexColor = "white"
+    elif (x1 - app.margin - 2 * r < event.x < x1 - app.margin and
+        y0 + app.margin + 4 * r < event.y < y0 + app.margin + 5 * r):
+        if app.timerDelay != 250:
+            app.timerDelay = 250
+            app.fourxColor = "light green"
+            app.onexColor = "white"
+        else:
+            app.timerDelay = 500
+            app.fourxColor = "white"
 
 # changes map size
 def sizeChanged(app):
@@ -141,10 +191,9 @@ def sizeChanged(app):
 def mouseDragged(app, event):
     if app.selected != None and app.debug:
         app.selected.pos = [event.x, event.y]
-    app.draw.append((event.x, event.y))
 
 def timerFired(app):
-    if not (app.crash or app.paused):
+    if not (app.crash or app.paused) and app.start:
         app.count += 1
         app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]
         app.timer = (time.time() - app.startTime) // 2
@@ -172,24 +221,28 @@ def timerFired(app):
                     app.display.remove(flight)
                     app.flights.remove(flight)
         # create arrivals every 120 seconds
-        if int(app.count % 120) == 0 and int(app.count) > 0 and len(app.flights) < 6:
+        if int(app.timer % 120 * 5) == 0 and int(app.count) > 0 and len(app.flights) < 6:
             app.flights.append(createArrival(app.mapWidth, app.mapHeight, app.airport))
             if not flight.check_on_grid(app.mapWidth, app.mapHeight):
                 app.flights.remove(flight)
 
 def redrawAll(app, canvas):
-    drawBackground(app, canvas)
-    drawAirport(app, canvas)
-    drawCommandInput(app, canvas)
-    for flight in app.flights:
-        if type(flight) == Departure:
-            drawDeparture(app, canvas, flight)
-        else: drawArrival(app, canvas, flight)
-    drawWaypoints(app, canvas)
-    drawWarning(app, canvas)
-    drawSidebar(app, canvas)
-    drawWind(app, canvas)
-    if app.crash:
-        drawGameOver(app, canvas)
+    if app.start:
+        drawBackground(app, canvas)
+        drawAirport(app, canvas)
+        drawCommandInput(app, canvas)
+        for flight in app.flights:
+            if type(flight) == Departure:
+                drawDeparture(app, canvas, flight)
+            else: drawArrival(app, canvas, flight)
+        drawWaypoints(app, canvas)
+        drawWarning(app, canvas)
+        drawSidebar(app, canvas)
+        drawWind(app, canvas)
+        if app.crash:
+            drawGameOver(app, canvas)
+    else:
+        drawStartScreen(app, canvas)
+        drawSidebarControls(app, canvas)
 
 runApp(width = 1920, height = 1080)

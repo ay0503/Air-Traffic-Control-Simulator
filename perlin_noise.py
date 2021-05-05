@@ -101,6 +101,6 @@ def octave(result, per, lac, octaves, level):
             result[y][x] = float("{:.2f}".format(noiseH))
     return result
 
-imageScale = 4
+imageScale = 5
 width, height = 1660 // imageScale, 1020 // imageScale
 result = octave([[0] * (width) for y in range(height)], 0.4, 1, 2, random.randint(10,20))

@@ -13,12 +13,13 @@ def randNo(len):
 # generates new callsign for the flight
 def newCallsign(airport):
     region = airport.code[0]
+    L = []
     if airport.size in ["A", "B"]:
         for airline in airlines:
             for hub in airlineHubs[airline]:
                 if hub[0] == region:
-                    call = airline
-                    break
+                    L.append(airline)
+        call = random.choice(L)
     else:
         call = random.choice(list(airlines.keys()))
     no = randNo(random.randrange(2,5))

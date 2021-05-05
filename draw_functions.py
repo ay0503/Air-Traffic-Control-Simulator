@@ -18,6 +18,8 @@ def drawBackground(app, canvas):
         canvas.create_text(app.mapWidth - 20, app.mapHeight - 20, anchor = 'e', 
                         text = f"{app.selected.callsign} - {app.selected.flt_no()}", 
                         font = "Arial 14 bold", fill = app.color)
+    canvas.create_text(2 * app.margin, app.mapHeight - 20, anchor = "w", text = f"{1000 // app.timerDelay}x Speed",
+                        font = "Arial 14 bold", fill = app.color)
 
 def drawClouds(app, canvas):
     canvas.create_image(app.mapWidth / 2, app.mapHeight / 2, image=ImageTk.PhotoImage(app.image))
@@ -105,12 +107,12 @@ def drawAircraft(app, canvas, plane, color):
                         plane.pos[0] + ar, plane.pos[1] + ar,
                         style = ARC, start = hdgAngle(plane.hdg) - 30, 
                         extent = 60, outline = app.color, width = 2.5)
-    # basic drawing feature
-    if app.selected == plane:
+    # path drawing feature
+    """ if app.selected == plane:
         for i in range(len(plane.path) - 1):
             x0, y0 = plane.path[i]
             x1, y1 = plane.path[i + 1]
-            canvas.create_line(x0, y0, x1, y1, fill = 'light green', width = 2)
+            canvas.create_line(x0, y0, x1, y1, fill = 'light green', width = 2) """
 
 def drawDeparture(app, canvas, plane):
     if not plane.sent:
@@ -138,8 +140,7 @@ def drawSidebar(app, canvas):
     drawSidebarFlights(app, canvas)
     drawSidebarDetails(app, canvas)
     if not app.pro:
-        #drawSidebarControls(app, canvas,)
-        pass
+        drawSidebarControls(app, canvas,)
     
 def drawSidebarDetails(app, canvas):
     if app.selected != None:
@@ -157,7 +158,7 @@ def drawSidebarDetails(app, canvas):
                             text = f"{key.capitalize()}: {data}",  font = 'Arial 12 bold', anchor = 'w')
 
 # TODO beginner control panel
-""" def drawSidebarControls(app, canvas):
+def drawSidebarControls(app, canvas):
     base = 280 + 6 * app.margin + app.detailHeight
     r = 55
     x0, y0, x1, y1 = app.mapWidth + app.margin, base, app.width - app.margin, base + app.controlHeight
@@ -165,24 +166,33 @@ def drawSidebarDetails(app, canvas):
     # left circle
     canvas.create_oval(x0 + app.margin, y0 + app.margin, x0 + app.margin + 2 * r, 
                         y0 + app.margin + 2 * r, outline = 'black', width = 2, fill = app.color)
-    # right circle
-    canvas.create_oval(x1 - app.margin, y0 + app.margin, x1 - app.margin - 2 * r, 
-                        y0 + app.margin + 2 * r, outline = 'black', width = 2, fill = app.color)
-    # speed box
+    canvas.create_text(x0 + app.margin + r, y0 + app.margin + 10, text = "0", fill = "black", font = 'Arial 12 bold')
+    canvas.create_text(x0 + app.margin + 2 * r - 10, y0 + app.margin + r, text = "90", fill = "black", font = 'Arial 12 bold')
+    canvas.create_text(x0 + app.margin + 15, y0 + app.margin + r, text = "270", fill = "black", font = 'Arial 12 bold')
+    canvas.create_text(x0 + app.margin + r, y0 + app.margin + 2 * r - 10, text = "180", fill = "black", font = 'Arial 12 bold')
+    # start
     canvas.create_rectangle(x0 + app.margin, y0 + app.margin + 2.5 * r, x0 + app.margin + 2 * r, 
-                        y0 + app.margin + 3.5 * r, outline = 'black', width = 2, fill = app.color)
-    # altitude box
+                        y0 + app.margin + 3.5 * r, outline = 'black', width = 2, fill = app.startColor)
+    canvas.create_text(x0 + app.margin + r, y0 + app.margin + 3 * r, text = "Start", 
+                        fill = "black", font = 'Arial 12 bold')
+    # pause
     canvas.create_rectangle(x1 - app.margin, y0 + app.margin + 2.5 * r, x1 - app.margin - 2 * r, 
-                        y0 + app.margin + 3.5 * r, outline = 'black', width = 2, fill = app.color)
-    # ils button
+                        y0 + app.margin + 3.5 * r, outline = 'black', width = 2, fill = app.pauseColor)
+    canvas.create_text(x1 - app.margin - r, y0 + app.margin + 3 * r, text = "Pause", 
+                        fill = "black", font = 'Arial 12 bold')
+    # 1x Speed
     canvas.create_rectangle(x0 + app.margin, y0 + app.margin + 4 * r, x0 + app.margin + 2 * r, 
-                        y0 + app.margin + 5 * r, outline = 'black', width = 2, fill = app.color)
-    # direct button
+                        y0 + app.margin + 5 * r, outline = 'black', width = 2, fill = app.onexColor)
+    canvas.create_text(x0 + app.margin + r, y0 + app.margin + 4.5 * r, text = "1x Speed", 
+                        fill = "black", font = 'Arial 12 bold')
+    # 4x Speed
     canvas.create_rectangle(x1 - app.margin, y0 + app.margin + 4 * r, x1 - app.margin - 2 * r, 
-                        y0 + app.margin + 5 * r, outline = 'black', width = 2, fill = app.color)
+                        y0 + app.margin + 5 * r, outline = 'black', width = 2, fill = app.fourxColor)
+    canvas.create_text(x1 - app.margin - r, y0 + app.margin + 4.5 * r, text = "4x Speed", 
+                        fill = "black", font = 'Arial 12 bold')
     if app.selected_waypoint != None:
         canvas.create_text(x1 - app.margin - r, y0 + app.margin + 4.5 * r, 
-                        text = f"{app.selected_waypoint.name}" , font = 'Arial 12 bold') """
+                        text = f"{app.selected_waypoint.name}" , font = 'Arial 12 bold')
 
 def drawSidebarFlights(app, canvas):
     # draw flight sticks
@@ -242,4 +252,14 @@ def drawGameOver(app, canvas):
     canvas.create_text(app.mapWidth / 2, app.mapHeight / 2, fill = app.color, font = "Arial 30 bold",
                         text = f"Game Ended Because of {app.cause} violation")
     canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 + 70, text = f"Score: {app.score}", 
-                        font = "Arial 30 bold", fill = app.color)      
+                        font = "Arial 30 bold", fill = app.color)   
+
+def drawStartScreen(app, canvas):
+    canvas.create_rectangle(0, 0, app.mapWidth, app.mapHeight, fill = 'black')
+    canvas.create_text(app.mapWidth / 2, app.mapHeight / 2, text = "Air Traffic Control Simulator",
+                        font = "Arial 45 bold", fill = app.color)
+    canvas.create_text(app.mapWidth / 2, app.mapHeight / 2 + 80, text = "Press the Start Button",
+                        font = "Arial 25 bold", fill = app.color)
+    canvas.create_rectangle(app.mapWidth, 0, app.width, app.height, fill = app.color)
+    canvas.create_rectangle(0, app.mapHeight, app.mapWidth, app.height, 
+                            fill = 'gray', outline = app.color, width = 2)

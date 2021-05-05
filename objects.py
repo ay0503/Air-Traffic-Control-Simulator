@@ -35,12 +35,11 @@ def checkLineDistance(beaconpos, runwaypos, pos, d = 20):
 def checkSafety(app):
     # TODO create storm proximity constraint
     for fl1 in app.flights:
-        #print(int(fl1.pos[1] // imageScale - 1), int(fl1.pos[0] // imageScale - 1))
-        """ if app.airport.storm[int(fl1.pos[1] // imageScale)][int(fl1.pos[0] // imageScale)] == "yellow3":
-            fl1.safe = False
-        elif app.airport.storm[int(fl1.pos[1] // imageScale)][int(fl1.pos[0] // imageScale)] == "firebrick1":
-            app.cause = "Storm"
-            fl1.crash = True """
+        if 0 < fl1.pos[0] < len(app.airport.storm[0]) and 0 < fl1.pos[1] < len(app.airport.storm[1]):
+            if app.airport.storm[int(fl1.pos[1] // imageScale)][int(fl1.pos[0] // imageScale)] == "firebrick1":
+                fl1.safe = False
+                app.cause = "Storm"
+                break
         if fl1.fuel / fl1.fuelRate < 5:
             fl1.crash = True
             app.cause = "Fuel"
@@ -52,7 +51,7 @@ def checkSafety(app):
             if fl1 != fl2:
                 d = distance(fl1.pos, fl2.pos)
                 altDiff = abs(fl1.alt - fl2.alt)
-                if d < 70 and altDiff < 500 and (fl1.alt and fl2.alt) > 500:
+                if d < 40 and altDiff < 500 and (fl1.alt and fl2.alt) > 500:
                     fl1.safe = fl2.safe = False
                     fl1.crash = fl2.crash = True
                     app.cause = "Proximity"
@@ -171,7 +170,7 @@ class Flight(object):
 
     # moves aircraft with current parameters
     def move(self):
-        self.path.append(self.pos)
+        #self.path.append(self.pos)
         self.pos[0] += hdgVector(self.hdg, self.spd / 100)[0]
         self.pos[1] -= hdgVector(self.hdg, self.spd / 100)[1]
         self.alt += self.vs / 25
