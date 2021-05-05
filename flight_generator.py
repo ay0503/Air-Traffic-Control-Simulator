@@ -1,10 +1,9 @@
 from objects import *
 from airline_data import airlines, airlineHubs
-from airport_data import airports
 from aircraft_data import aircrafts
 import random, copy
 
-#airport = Airport("KLAX", [0,0], [], 'A', [330, 12])
+#* Random Flight Generator File
 
 # generates new 4 digit number for flight number
 def randNo(len):

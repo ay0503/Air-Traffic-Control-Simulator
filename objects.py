@@ -1,8 +1,9 @@
-import string, math, time
+import string, math
 from airline_data import airlines, airlineHubs
 from airport_data import airports
 import decimal, random, copy
-time = time.time()
+
+#* Object File Containing Game Objects and Helpful Functions
 
 # helper functions
 imageScale = 5
@@ -38,6 +39,7 @@ def checkSafety(app):
         if 0 < fl1.pos[0] < len(app.airport.storm[0]) and 0 < fl1.pos[1] < len(app.airport.storm[1]):
             if app.airport.storm[int(fl1.pos[1] // imageScale)][int(fl1.pos[0] // imageScale)] == "firebrick1":
                 fl1.safe = False
+                # fl1.crash = random.choice([True] * 1 + [False] * 20)
                 app.cause = "Storm"
                 break
         if fl1.fuel / fl1.fuelRate < 5:
@@ -465,8 +467,5 @@ class Weather(object):
     def createStorms(self, pos, airport, level):
         self.stormLevel = level
         self.winds = self.createWinds()
-
-    def createWinds(self, airport):
-        pass
 
 testCheckDirection()

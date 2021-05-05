@@ -5,9 +5,12 @@ from airline_data import airlines
 from weather import winds, storm
 import string, random
 
+#* RANDOM AIRPORT GENERATION FILE
+
 # continent codes https://en.wikipedia.org/wiki/ICAO_airport_code#/media/File:ICAO_FirstLetter.svg
 continentCodes = ["K", "C", "S", "U", "Z", "R", "Y", "V", "O", "E", "L"]
 letters = list(string.ascii_uppercase)
+# https://www.skybrary.aero/index.php/ICAO_Aerodrome_Reference_Code
 sizes = ["A", "B", "C", "D", "E", "F"]
 
 #* size guideline (custom based on aircraft classes)

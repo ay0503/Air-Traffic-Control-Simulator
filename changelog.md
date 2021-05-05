@@ -131,7 +131,7 @@ create arrival generator
 - weather generation is now part of airport generation
 - added text explaining why game ended
 
-5/4/2021 - 4.3 hours
+5/4/2021 - 8.3 hours
 - changed airports so local airports only have domestic departure airport generation
 - local and regional airports only have domestic airlines
 - added vspeeds feature for aircraft type
@@ -139,3 +139,9 @@ create arrival generator
 - entering severe storms now crash the plane with some probability
 - added blinking warnings for proximity and fuel
 - changed command input to string based input
+
+5/5/2021 - 7.2 hours
+- added start screen
+- added new weather to restart feature
+- added more shortcuts
+- added simulation speed feature

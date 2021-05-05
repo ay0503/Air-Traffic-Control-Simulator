@@ -1,10 +1,9 @@
-import random, math
 from objects import *
 from cmu_112_graphics import *
 from map_generation import noiseMap
 from perlin_noise import result
 
-#! NOISE MAP VISUALIZER
+#* NOISE MAP VISUALIZER
 
 def appStarted(app):
     # now let's make a copy that only uses the red part of each rgb pixel:

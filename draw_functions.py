@@ -1,7 +1,6 @@
 from cmu_112_graphics import *
 from objects import *
 from weather import noiseMap
-import threading
 from storm_radar import drawClouds
 
 # draws weather, range rings (200nm)
@@ -190,9 +189,6 @@ def drawSidebarControls(app, canvas):
                         y0 + app.margin + 5 * r, outline = 'black', width = 2, fill = app.fourxColor)
     canvas.create_text(x1 - app.margin - r, y0 + app.margin + 4.5 * r, text = "4x Speed", 
                         fill = "black", font = 'Arial 12 bold')
-    if app.selected_waypoint != None:
-        canvas.create_text(x1 - app.margin - r, y0 + app.margin + 4.5 * r, 
-                        text = f"{app.selected_waypoint.name}" , font = 'Arial 12 bold')
 
 def drawSidebarFlights(app, canvas):
     # draw flight sticks

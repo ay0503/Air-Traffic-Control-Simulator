@@ -1,3 +1,8 @@
+
+#! Airline Data for Game
+
+# https://abbreviations.yourdictionary.com/articles/airline-abbreviations-for-major-carriers.html
+
 airlineList = """ 
 
 DAL, Delta, KSEA, KATL, KJFK, KMDW, KSLC, KLGA, LFPG, EHAM

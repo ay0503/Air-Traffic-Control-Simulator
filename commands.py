@@ -12,7 +12,10 @@ testFlights = [Flight('DAL123', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI
         Flight('KAL123', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI', 535),
         Flight('DAL3232', 'B738', [0, 0], 234, 230, 9000, 0, 'KLAX', 'RKSI', 535),]
 
-# typo recgnition
+#* Command Recognition File
+
+#* typo recognition
+#* inspired by nearestWords(wordList, word), https://www.cs.cmu.edu/~112/notes/extra-practice5.html
 
 # returns dictionary of letter counts
 def letterCounts(word):
@@ -47,7 +50,7 @@ def findMatches(typo, words, index):
             return word
     return None
 
-# command recognition
+#* command recognition
 
 # returns callsign that matches the callsign in the command
 def findCallsign(cmd, aircrafts):

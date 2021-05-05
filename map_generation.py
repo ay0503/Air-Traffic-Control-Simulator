@@ -2,7 +2,7 @@ from objects import *
 from cmu_112_graphics import *
 from perlin_noise import result
 
-#! WIND MAP VISUALIZER
+#* WIND MAP VISUALIZER
 
 # https://www.cs.cmu.edu/~112/notes/notes-2d-lists.html#printing
 def print2dList(a):

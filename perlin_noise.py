@@ -1,6 +1,8 @@
 import random, copy
 from objects import distance
 
+#* Perlin Noise Map Generator File
+
 def minAndMax(L):
     right, left = -1, 1
     for row in L:
@@ -9,31 +11,6 @@ def minAndMax(L):
         elif min(row) < left:
             left = min(row)
     return left, right
-
-# https://www.cs.cmu.edu/~112/notes/notes-2d-lists.html#printing
-def maxItemLength(a):
-    maxLen = 0
-    for row in range(len(a)):
-        for col in range(len(a[row])):
-            maxLen = max(maxLen, len(repr(a[row][col])))
-    return maxLen
-
-# https://www.cs.cmu.edu/~112/notes/notes-2d-lists.html#printing
-def print2dList(a):
-    if (a == []):
-        # So we don't crash accessing a[0]
-        print([])
-        return
-    rows, cols = len(a), len(a[0])
-    fieldWidth = maxItemLength(a)
-    print('[')
-    for row in range(rows):
-        print(' [ ', end='')
-        for col in range(cols):
-            if (col > 0): print(', ', end='')
-            print(str(a[row][col]).rjust(fieldWidth), end='')
-        print(' ]')
-    print(']')
 
 # returns unit vector between two points
 def unitVector(x, y):
@@ -61,6 +38,8 @@ def interpolate(d, a, b):
 def f(x, y, width, height, dx, dy, a, level):
     return ((a * (x - dx * width) / width) ** 2 + ((y - dy * height) / height) ** 2) * level
 
+# https://en.wikipedia.org/wiki/Perlin_noise
+# https://adrianb.io/2014/08/09/perlinnoise.html
 # creates noise for point x,y
 def noise(x, y, scale):
     # corners

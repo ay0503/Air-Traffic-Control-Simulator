@@ -8,9 +8,10 @@ from weather import wind, stormCloud, changeRange
 from draw_functions import *
 import time, string
 
+#* Main File for Game (run to start)
+
 #!!! BUG ON MACOS WHERE AIRCRAFT SPAWNS UNDER COMMMAND PROMPT (not on Windows)
 # TODO START SCREEN
-
 
 def appStarted(app):
 
@@ -35,7 +36,7 @@ def appStarted(app):
     app.pro = False
     app.score = 0
     app.debug = False
-    app.timerDelay = 200
+    app.timerDelay = 500
     app.index = 0
     app.timer = 0
     app.difficulty = 0
@@ -47,12 +48,10 @@ def appStarted(app):
     app.start = False
     app.paused = False
 
-    # weather
-    app.imageScale = 5
-
     # random generation
     app.airport = generateAirport([app.mapWidth / 2, app.mapHeight / 2])
     app.airport.create_waypoints(app.mapWidth, app.mapHeight)
+    app.imageScale = 5
     newWeather(app)
     app.image = Image.new(mode='RGB', size=(len(app.airport.storm[0]), len(app.airport.storm)))
     saveImage(app)
@@ -124,6 +123,9 @@ def keyPressed(app, event):
             app.not_draw = not app.not_draw
         elif event.key == "p":
             app.paused = not app.paused
+            if app.paused:
+                app.pauseColor = "light green"
+            else: app.pauseColor = "white"
         elif event.key == "r":
             appStarted(app)
 

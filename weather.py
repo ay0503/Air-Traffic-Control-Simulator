@@ -1,22 +1,7 @@
 from objects import *
 from perlin_noise import result
 
-# https://www.cs.cmu.edu/~112/notes/notes-2d-lists.html#printing
-def print2dList(a):
-    if (a == []):
-        # So we don't crash accessing a[0]
-        print([])
-        return
-    rows, cols = len(a), len(a[0])
-    fieldWidth = len(a[0])
-    print('[')
-    for row in range(rows):
-        print(' [ ', end='')
-        for col in range(cols):
-            if (col > 0): print(', ', end='')
-            print(str(a[row][col]).rjust(fieldWidth), end='')
-        print(' ]')
-    print(']')
+#* Weather Generation File for Winds and Storms
 
 # wind map generation
 def wind(L):
@@ -72,7 +57,7 @@ def stormCloud(L):
     result = copy.deepcopy(L)
     #! scale to control storm probability
     scale = random.uniform(-0.11, 0)
-    #! to showcase
+    #! scale to showcase
     #scale = -0.07
     for y in range(len(L)):
         for x in range(len(L[0])):
@@ -96,8 +81,5 @@ def removeZeros(L):
     L.pop()
 
 noiseMap = result
-#print2dList(noiseMap)
 winds = wind(changeRange(noiseMap))
 storm = stormCloud(changeRange(noiseMap))
-
-#print(stormCloud(noiseMap))

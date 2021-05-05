@@ -1,6 +1,11 @@
 from objects import *
 import random
 
+#! Aircraft Data for Game
+
+# https://www.skybrary.aero/index.php/ICAO_Aerodrome_Reference_Code
+# https://en.wikipedia.org/wiki/List_of_aircraft_type_designators
+
 aircraftList = """ 
 
 # Antonov
