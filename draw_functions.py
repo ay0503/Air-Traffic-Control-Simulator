@@ -106,12 +106,6 @@ def drawAircraft(app, canvas, plane, color):
                         plane.pos[0] + ar, plane.pos[1] + ar,
                         style = ARC, start = hdgAngle(plane.hdg) - 30, 
                         extent = 60, outline = app.color, width = 2.5)
-    # path drawing feature
-    """ if app.selected == plane:
-        for i in range(len(plane.path) - 1):
-            x0, y0 = plane.path[i]
-            x1, y1 = plane.path[i + 1]
-            canvas.create_line(x0, y0, x1, y1, fill = 'light green', width = 2) """
 
 def drawDeparture(app, canvas, plane):
     if not plane.sent:

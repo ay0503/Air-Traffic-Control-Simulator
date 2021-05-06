@@ -4,23 +4,6 @@ from perlin_noise import result
 
 #* WIND MAP VISUALIZER
 
-# https://www.cs.cmu.edu/~112/notes/notes-2d-lists.html#printing
-def print2dList(a):
-    if (a == []):
-        # So we don't crash accessing a[0]
-        print([])
-        return
-    rows, cols = len(a), len(a[0])
-    fieldWidth = len(a[0])
-    print('[')
-    for row in range(rows):
-        print(' [ ', end='')
-        for col in range(cols):
-            if (col > 0): print(', ', end='')
-            print(str(a[row][col]).rjust(fieldWidth), end='')
-        print(' ]')
-    print(']')
-
 # wind map generation
 def wind(L):
     result = [[0] * (len(L[0]) - 1) for y in range(len(L) - 1)]

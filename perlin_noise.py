@@ -59,7 +59,6 @@ def noise(x, y, scale):
     bottom = interpolate(dx, dot(g3, d3), dot(g4, d4))
     return interpolate(dy, top, bottom) * scale
 
-# TODO scale parameter in storm object
 # returns 2D list of noise with octave, persistance, lacunarity parameters
 def octave(result, per, lac, octaves, level):
     width, height = len(result[0]), len(result)

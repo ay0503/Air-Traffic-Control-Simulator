@@ -10,8 +10,7 @@ import time, string
 
 #* Main File for Game (run to start)
 
-#!!! BUG ON MACOS WHERE AIRCRAFT SPAWNS UNDER COMMMAND PROMPT (not on Windows)
-# TODO START SCREEN
+#!!! BUG ON MACOS WHERE AIRCRAFT SPAWNS UNDER COMMMAND PROMPT OR SIDEBAR (not on Windows)
 
 def appStarted(app):
 
@@ -195,6 +194,8 @@ def mouseDragged(app, event):
         app.selected.pos = [event.x, event.y]
 
 def timerFired(app):
+    if len(app.flights) < 2:
+        app.flights += [createArrival(app.mapWidth, app.mapHeight, app.airport), createDeparture(app.airport)]
     if not (app.crash or app.paused) and app.start:
         app.count += 1
         app.display = app.flights[app.index:min(len(app.flights), app.index + app.sticks)]

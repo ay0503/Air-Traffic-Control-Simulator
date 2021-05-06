@@ -34,7 +34,6 @@ def checkLineDistance(beaconpos, runwaypos, pos, d = 20):
 
 # changes safety status of aircraft based on proximity and fuel limits
 def checkSafety(app):
-    # TODO create storm proximity constraint
     for fl1 in app.flights:
         if 0 < fl1.pos[0] < len(app.airport.storm[0]) and 0 < fl1.pos[1] < len(app.airport.storm[1]):
             if app.airport.storm[int(fl1.pos[1] // imageScale)][int(fl1.pos[0] // imageScale)] == "firebrick1":
@@ -57,7 +56,7 @@ def checkSafety(app):
                     fl1.safe = fl2.safe = False
                     fl1.crash = fl2.crash = True
                     app.cause = "Proximity"
-                if d < 80 and altDiff < 1500:
+                if d < 80 and altDiff < 1500 and (fl1.alt and fl2.alt) > 500:
                     fl1.safe = fl2.safe = False
                     app.cause = "Proximity"
                     break
@@ -281,7 +280,6 @@ class Departure(Flight):
     def clear_takeoff(self):
         self.cleared = True
 
-    # TODO replace with vspeed 
     # aircraft takesoff (accelerates to speed when it will increase in altitude)
     def takeoff(self):
         if self.spd < self.type.vspeed:
@@ -381,8 +379,6 @@ class Airline(object):
         self.name = name
         self.hubs = hubs
 
-# TODO create time, size based traffic
-# TODO create weather based states
 class Airport(object):
 
     def __init__(self, code, pos, runways, size):
@@ -397,7 +393,6 @@ class Airport(object):
         return airports[self.code]
 
     # aircraft that are larger than the airport size will not be generated
-    # TODO create purpose for this condition
     def check_size_limits(self, aircraft):
         if ord(aircraft.size) > ord(self.size):
             return False
@@ -406,7 +401,6 @@ class Airport(object):
     # generates a size dependent number of random waypoint object
     # and adds it to the airport's waypoint list
     def create_waypoints(self, width, height):
-        # TODO modify frequency of random name lengths
         for i in range(15 * (ord(self.size) - ord("A") + 1)):
             x, y = random.randrange(100, width - 100), random.randrange(50, height - 50)
             name = ''

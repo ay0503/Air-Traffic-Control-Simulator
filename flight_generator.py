@@ -52,8 +52,6 @@ def newAltitude():
 # generates a new starting speed based on size
 def newSpeed(size):
     # size based speeds make gameplay very slow
-    """ if size == "A":
-        return random.choice([80, 90, 100, 110]) """
     spds = [210, 220, 230, 240, 250]
     return random.choice(spds)
 
